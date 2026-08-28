@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "viseron-qqbotpy"
+version = "0.1.0"
+description = "A modern, asyncio-based Python SDK for the QQ Open Platform Bot API (api-v2)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Viseron" }]
+keywords = ["qq", "qqbot", "qq-bot", "qq机器人", "sdk", "websocket", "bot"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "aiohttp>=3.7.4,<4",
+]
+
+[project.optional-dependencies]
+ext = ["PyYAML>=6", "APScheduler>=3.10"]
+webhook = ["cryptography>=41"]
+dev = ["pytest>=7", "pytest-asyncio>=0.21", "python-dotenv>=1"]
+
+[project.urls]
+Homepage = "https://bot.q.qq.com/wiki/develop/api-v2/"
+Documentation = "https://bot.q.qq.com/wiki/develop/api-v2/"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+viseron_qqbotpy = ["py.typed"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
