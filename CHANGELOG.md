@@ -38,10 +38,6 @@
 
 ### Fixed
 
-- 修复 AppID / AppSecret 为 None、数字或空字符串时延迟报 appid invalid 的问题，入口提前抛出 TypeError。
-- 修复运行中 Ctrl+C 抛出长串 KeyboardInterrupt 的问题。
-- 修复外部调用 close 时 start 可能抛出 CancelledError 的问题。
-- 修复 WebSocket 会话在关闭时可能未及时清理的问题。
 - 修复日程创建/修改接口 payload 字段名错误：reminder_id 改为 remind_type。
 - 修复文档中群成员禁言示例：op 和 mute_expire_at 格式错误。
 - 修复 README 中直接调用 API 示例 bot 未定义的问题。
