@@ -55,4 +55,6 @@
 ### Fixed
 
 - 修复 SDK 默认不写磁盘日志、且无统一默认格式的问题。
+- 修复日程创建/修改接口 payload 字段名错误：reminder_id 改为 remind_type。
+- 修复文档中群成员禁言示例：op 由 mute 改为 add/update/del，mute_expire_at 改为 RFC3339 时间格式。
 

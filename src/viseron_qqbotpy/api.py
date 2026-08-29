@@ -522,7 +522,7 @@ class BotAPI:
                 "start_timestamp": start_timestamp,
                 "end_timestamp": end_timestamp,
                 "jump_channel_id": jump_channel_id,
-                "reminder_id": remind_type,
+                "remind_type": remind_type,
             }
         }
         return await self._post("/channels/{channel_id}/schedules", json=payload, channel_id=channel_id)
@@ -543,7 +543,7 @@ class BotAPI:
                 "start_timestamp": start_timestamp,
                 "end_timestamp": end_timestamp,
                 "jump_channel_id": jump_channel_id,
-                "reminder_id": remind_type,
+                "remind_type": remind_type,
             }
         }
         return await self._patch(
