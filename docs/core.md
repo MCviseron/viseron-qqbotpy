@@ -240,6 +240,60 @@ WebSocket 事件订阅位掩码。
 
 ## 5. 日志
 
+SDK 会为自己的 logger 提供默认日志配置。
+
+### 默认行为
+
+第一次使用 SDK 日志时，SDK 会自动完成以下配置：
+
+- 控制台输出格式为：
+
+    [INFO]    (gateway.py:行号)函数名    [viseron-botpy]  日志信息
+
+- 控制台中的 [INFO] 为黄色，后面的日志信息为白色。
+- 同时在磁盘写入 logs/viseron-botpy.log。
+- 日志文件使用 RotatingFileHandler，默认单文件 5 MB，最多保留 5 个旧文件。
+- SDK 不会调用 logging.basicConfig，不会影响其他 logger。
+
+### 使用默认日志
+
+什么都不用配置，直接运行即可：
+
+    from viseron_qqbotpy import Client, Intents
+
+    bot = Client(intents=Intents.default())
+    bot.run(appid="102791796", secret="你的 AppSecret")
+
+### 自定义日志配置
+
+SDK 提供 configure_logging：
+
+    from viseron_qqbotpy import configure_logging
+
+    configure_logging(
+        level=logging.INFO,
+        log_file="logs/my-bot.log",
+        use_console=True,
+        use_file=True,
+    )
+
+参数说明：
+
+- level：日志级别，默认 INFO。
+- log_file：日志文件路径，默认 logs/viseron-botpy.log。
+- console_format：控制台格式，None 表示使用 SDK 默认格式。
+- file_format：文件格式，None 表示使用 SDK 默认格式。
+- use_console：是否输出到控制台。
+- use_file：是否写入磁盘日志文件。
+
+### 关闭磁盘日志
+
+    configure_logging(use_file=False)
+
+### 只写文件，不输出控制台
+
+    configure_logging(use_console=False, use_file=True)
+
 ### get_logger
 
 获取 SDK 或业务自己的 logger。
@@ -250,18 +304,13 @@ WebSocket 事件订阅位掩码。
 
 用法：
 
-    import logging
-
-    logging.basicConfig(level=logging.INFO)
-
     logger = get_logger("my_bot")
     logger.info("启动成功")
-    logger.error("出错了")
 
 说明：
 
 - get_logger 不传参数时返回 SDK 内部使用的 viseron_qqbotpy logger。
-- SDK 不会自动调用 logging.basicConfig，应用需要自行配置日志输出。
+- 业务自己的 logger 不会被 SDK 自动配置。
 
 ## 6. 事件模型
 

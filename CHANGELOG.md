@@ -42,4 +42,17 @@
 
 ## [Unreleased]
 
-- 暂无。
+### Added
+
+- 新增 configure_logging，可自定义 SDK 日志级别、控制台格式、文件路径以及是否输出控制台/写入磁盘。
+- 新增 SDK 默认日志配置：控制台使用彩色格式，并自动写入 logs/viseron-botpy.log。
+
+### Changed
+
+- SDK 日志消息前缀由 [viseron-qqbotpy] 调整为 [viseron-botpy]。
+- 默认日志格式调整为 [LEVEL] (filename:lineno)funcName [viseron-botpy] message。
+
+### Fixed
+
+- 修复 SDK 默认不写磁盘日志、且无统一默认格式的问题。
+

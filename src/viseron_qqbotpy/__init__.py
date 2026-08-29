@@ -43,7 +43,7 @@ from .models import (
     SubscribeMessageStatusEvent,
     User,
 )
-from .logging import get_logger
+from .logging import configure_logging, get_logger
 
 __all__ = [
     "APIError",
@@ -85,6 +85,7 @@ __all__ = [
     "User",
     "ViseronError",
     "WebSocketError",
+    "configure_logging",
     "get_logger",
 ]
 

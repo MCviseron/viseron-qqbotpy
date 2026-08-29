@@ -88,7 +88,7 @@ class Client:
         try:
             asyncio.run(self.start(appid, secret))
         except KeyboardInterrupt:
-            _log.info("[viseron-qqbotpy] 收到 Ctrl+C，机器人已退出")
+            _log.info("[viseron-botpy] 收到 Ctrl+C，机器人已退出")
 
     async def start(self, appid: str, secret: str, ret_coro: bool = False) -> Optional[Coroutine[Any, Any, None]]:
         """Connect to the gateway and keep running until closed.
@@ -121,11 +121,11 @@ class Client:
         self.api = BotAPI(self._http)
         self._dispatcher = EventDispatcher(self.ws_dispatch, self.api)
 
-        _log.info("[viseron-qqbotpy] logging in bot %s", appid)
+        _log.info("[viseron-botpy] logging in bot %s", appid)
         try:
             self._robot = await self.api.me()
         except Exception as exc:  # noqa: BLE001 - /users/@me is not essential
-            _log.warning("[viseron-qqbotpy] could not fetch bot profile: %s", exc)
+            _log.warning("[viseron-botpy] could not fetch bot profile: %s", exc)
             self._robot = {}
 
     async def _run_gateway(self) -> None:
@@ -139,7 +139,7 @@ class Client:
         max_concurrency = max(int(session_limit.get("max_concurrency", 1)), 1)
 
         _log.info(
-            "[viseron-qqbotpy] gateway url=%s shards=%s max_concurrency=%s",
+            "[viseron-botpy] gateway url=%s shards=%s max_concurrency=%s",
             url,
             shards,
             max_concurrency,
@@ -187,7 +187,7 @@ class Client:
             if isinstance(data, dict) and data.get("url"):
                 return data
         except Exception as exc:  # noqa: BLE001
-            _log.warning("[viseron-qqbotpy] /gateway/bot failed, falling back to /gateway: %s", exc)
+            _log.warning("[viseron-botpy] /gateway/bot failed, falling back to /gateway: %s", exc)
 
         data = await self.api.get_ws_url()
         if not isinstance(data, dict) or not data.get("url"):
@@ -229,7 +229,7 @@ class Client:
         method_name = "on_" + event
         method = getattr(self, method_name, None)
         if method is None:
-            _log.debug("[viseron-qqbotpy] event %s has no handler %s", event, method_name)
+            _log.debug("[viseron-botpy] event %s has no handler %s", event, method_name)
             return
         loop = asyncio.get_running_loop()
         loop.create_task(self._run_event(method, method_name, *args, **kwargs), name=f"qqbot-{method_name}")
@@ -246,7 +246,7 @@ class Client:
                 pass
 
     async def _on_gateway_error(self, exc: BaseException) -> None:
-        _log.error("[viseron-qqbotpy] gateway error: %s", exc)
+        _log.error("[viseron-botpy] gateway error: %s", exc)
         await self.on_error("gateway", exc)
 
     # ------------------------------------------------------------------ #

@@ -113,7 +113,7 @@ class TokenManager:
                     try:
                         await self._refresh()
                     except Exception as exc:  # noqa: BLE001 - old token is still valid
-                        _log.warning("[viseron-qqbotpy] token refresh failed, keeping old token: %s", exc)
+                        _log.warning("[viseron-botpy] token refresh failed, keeping old token: %s", exc)
 
         assert self._token is not None
         return self._token.value
@@ -150,7 +150,7 @@ class TokenManager:
             raise TokenError(f"invalid expires_in value: {payload.get('expires_in')!r}") from exc
 
         self._token = AccessToken(value, expires_in)
-        _log.info("[viseron-qqbotpy] access_token refreshed, expires_in=%s", expires_in)
+        _log.info("[viseron-botpy] access_token refreshed, expires_in=%s", expires_in)
 
     async def _get_session(self) -> aiohttp.ClientSession:
         if self._session is None or self._session.closed:
