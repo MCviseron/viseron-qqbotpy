@@ -39,16 +39,24 @@
 
 ## 快速开始
 
-    import logging
+    import os
+    from pathlib import Path
 
-    from viseron_qqbotpy import Client, Intents, Message
+    from viseron_qqbotpy import Client, Intents, Message, configure_logging, load_env
 
-    logging.basicConfig(level=logging.INFO)
+    # 读取项目根目录的 .env
+    load_env(Path(__file__).resolve().parents[1] / ".env")
+
+    # 使用 SDK 默认日志格式，并写入 logs/viseron-botpy.log
+    configure_logging()
+
+    APPID = os.getenv("APPID", "")
+    APPSECRET = os.getenv("APPSECRET", "")
 
 
     class MyBot(Client):
         async def on_ready(self):
-            print(f"机器人已上线: {self.robot}")
+            print("机器人已上线")
 
         async def on_at_message_create(self, message: Message):
             await message.reply(content=f"收到: {message.content}")
@@ -56,9 +64,9 @@
 
     if __name__ == "__main__":
         bot = MyBot(intents=Intents.default())
-        bot.run(appid="你的 AppID", secret="你的 AppSecret")
+        bot.run(appid=APPID, secret=APPSECRET)
 
-更多事件与用法见 examples/。
+更多事件与用法见 examples/ 和 docs/。
 
 ## 事件订阅
 
@@ -79,9 +87,33 @@
 
 ## 直接调用 API
 
-    async with bot:
-        # 通过 bot.api 直接调用
-        guilds = await bot.api.me_guilds()
+在 Client 子类中，可以直接使用 self.api：
+
+    class MyBot(Client):
+        async def on_ready(self):
+            guilds = await self.api.me_guilds()
+            print(guilds)
+
+如果只需要 HTTP API，不连接 WebSocket：
+
+    import asyncio
+
+    from viseron_qqbotpy import BotAPI, HTTPClient, TokenManager
+
+
+    async def main():
+        token = TokenManager("你的 AppID", "你的 AppSecret")
+        http = HTTPClient(token)
+        api = BotAPI(http)
+
+        me = await api.me()
+        print(me)
+
+        await http.close()
+        await token.close()
+
+
+    asyncio.run(main())
 
 ## Access Token 刷新机制
 
@@ -110,8 +142,11 @@
       gateway.py      # WebSocket 网关/分片/重连
       token.py        # access token 无缝刷新
       http.py         # HTTP 客户端
+      env.py          # .env 文件加载
+      logging.py      # 默认日志与 configure_logging
       dispatcher.py   # 事件解析与分发
       models.py       # 事件 dataclass
+      types.py        # payload 类型提示
       flags.py        # Intents / Permission
       errors.py       # 异常体系
       webhook.py      # 可选 Webhook 签名
