@@ -1200,15 +1200,20 @@
 
 - group_openid：群 OpenID。
 - members：需要操作的成员列表，每项包含 op、member_openid、mute_expire_at 等字段。
-- op 可选 mute 或 unmute。
+- op 可选 add、update、del。
+  - add：增加禁言
+  - update：更新禁言到期时间
+  - del：解除禁言
+- member_openid 是群成员 OpenID，不是 user_openid。
+- mute_expire_at 使用 RFC3339 时间格式。
 
 示例：
 
     members = [
         {
-            "op": "mute",
+            "op": "add",
             "member_openid": "成员 OpenID",
-            "mute_expire_at": "1700000000",
+            "mute_expire_at": "2026-08-29T12:00:00+08:00",
         }
     ]
 
