@@ -5,6 +5,52 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+- 暂无。
+
+## [0.2.0] - 2026-08-30
+
+### Added
+
+- 新增 configure_logging，可配置 SDK 日志级别、控制台格式、文件路径、是否输出控制台/写入磁盘。
+- 新增 SDK 默认日志配置：控制台使用彩色格式，并自动写入 logs/viseron_qqbotpy.log。
+- 新增 load_env，用于读取 .env 文件。
+- 新增 env.py 模块，并在主包导出 load_env。
+- 新增 TokenManager 无缝刷新单元测试：窗口内刷新、刷新失败回退旧 token、并发只刷新一次。
+- 新增 docs/core.md，说明 SDK 基础能力。
+- 新增 docs/publish.md，说明构建、上架 PyPI 与安装方式。
+- 新增 .gitignore 对 logs/、.pypirc、*.pem、*.key 等敏感或生成文件的忽略。
+- 新增 CHANGELOG.md，建立版本记录。
+
+### Changed
+
+- 日志消息前缀统一为 [viseron_qqbotpy]。
+- 默认日志文件从 logs/viseron-botpy.log 改为 logs/viseron_qqbotpy.log。
+- 控制台日志格式调整为 [LEVEL] (filename:lineno)funcName 黄色，消息白色。
+- README 快速开始示例改为使用 load_env 和 configure_logging。
+- README 直接调用 API 示例改为完整可运行示例。
+- docs/features.md 每个功能示例补充功能说明、参数来源、返回内容和注意事项。
+- docs/events.md 事件表新增事件说明列。
+- docs 目录结构新增 core.md 和 publish.md。
+- HTTPClient.close 仅关闭自身创建的 session。
+- GatewayShard 改为显式关闭 WebSocket session。
+
+### Fixed
+
+- 修复 AppID / AppSecret 为 None、数字或空字符串时延迟报 appid invalid 的问题，入口提前抛出 TypeError。
+- 修复运行中 Ctrl+C 抛出长串 KeyboardInterrupt 的问题。
+- 修复外部调用 close 时 start 可能抛出 CancelledError 的问题。
+- 修复 WebSocket 会话在关闭时可能未及时清理的问题。
+- 修复日程创建/修改接口 payload 字段名错误：reminder_id 改为 remind_type。
+- 修复文档中群成员禁言示例：op 和 mute_expire_at 格式错误。
+- 修复 README 中直接调用 API 示例 bot 未定义的问题。
+
+### Removed
+
+- 移除旧日志前缀 [viseron-botpy]。
+- 移除 README 中旧版 logging.basicConfig 示例。
+
 ## [0.1.0] - 2026-08-29
 
 ### Added
@@ -17,11 +63,10 @@
 - 新增 WebSocket 网关，支持 Identify、Resume、Heartbeat、分片、断线重连。
 - 新增 EventDispatcher 与事件 dataclass 模型，所有模型保留 raw 原始 payload。
 - 新增 Intents 与 Permission 位掩码。
-- 新增 load_env，用于加载 .env 文件。
 - 新增 Webhook Ed25519 签名验证工具。
 - 新增 ext 扩展：命令装饰器、颜色转换、频道跳转、YAML 配置读取、APScheduler 调度器。
 - 新增使用文档 docs/，包含快速开始、基础能力、事件、功能指南、API 参考、扩展、Webhook、构建发布。
-- 新增 CHANGELOG.md、README.md、pyproject.toml、examples 和 tests。
+- 新增 README.md、pyproject.toml、examples 和 tests。
 - 新增 PyPI 构建配置，支持生成 wheel 与 sdist。
 
 ### Changed
@@ -39,22 +84,3 @@
 - 修复 WebSocket 会话在关闭时可能未及时清理的问题。
 - 修复 os.getenv 不会自动读取 .env 导致的 None 凭据问题，新增 load_env。
 - 修复并校准事件表、Intents 位和 API 路径，使其对齐最新 API v2 文档。
-
-## [Unreleased]
-
-### Added
-
-- 新增 configure_logging，可自定义 SDK 日志级别、控制台格式、文件路径以及是否输出控制台/写入磁盘。
-- 新增 SDK 默认日志配置：控制台使用彩色格式，并自动写入 logs/viseron_qqbotpy.log。
-
-### Changed
-
-- SDK 日志消息前缀由 [viseron-qqbotpy] 调整为 [viseron_qqbotpy]。
-- 默认日志格式调整为 [LEVEL] (filename:lineno)funcName [viseron_qqbotpy] message。
-
-### Fixed
-
-- 修复 SDK 默认不写磁盘日志、且无统一默认格式的问题。
-- 修复日程创建/修改接口 payload 字段名错误：reminder_id 改为 remind_type。
-- 修复文档中群成员禁言示例：op 由 mute 改为 add/update/del，mute_expire_at 改为 RFC3339 时间格式。
-

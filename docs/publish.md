@@ -233,9 +233,9 @@ __init__.py：
 
 本文档编写时，已经成功构建并检查通过：
 
-- viseron-botpy/dist/viseron_qqbotpy-0.1.0-py3-none-any.whl
-- viseron-botpy/dist/viseron_qqbotpy-0.1.0.tar.gz
+- viseron-botpy/dist/viseron_qqbotpy-0.2.0-py3-none-any.whl
+- viseron-botpy/dist/viseron_qqbotpy-0.2.0.tar.gz
 
 可以直接用它们做本地安装测试：
 
-    pip install dist/viseron_qqbotpy-0.1.0-py3-none-any.whl
+    pip install dist/viseron_qqbotpy-0.2.0-py3-none-any.whl
