@@ -91,12 +91,12 @@ class GatewayShard:
                 if self.on_error is not None:
                     await self.on_error(exc)
                 else:
-                    _log.error("[viseron-botpy] gateway error: %s", exc)
+                    _log.error("[viseron_qqbotpy] gateway error: %s", exc)
 
             if stop_event.is_set():
                 break
             if self._close_code in _FATAL_CLOSE_CODES:
-                _log.error("[viseron-botpy] fatal gateway close code %s, stopping shard", self._close_code)
+                _log.error("[viseron_qqbotpy] fatal gateway close code %s, stopping shard", self._close_code)
                 break
 
             if self._close_code not in _RESUME_CLOSE_CODES:
@@ -119,7 +119,7 @@ class GatewayShard:
         try:
             async with session.ws_connect(self.url) as ws:
                 self._ws = ws
-                _log.info("[viseron-botpy] shard [%s/%s] connected", self.shard_id, self.shard_count)
+                _log.info("[viseron_qqbotpy] shard [%s/%s] connected", self.shard_id, self.shard_count)
                 async for message in ws:
                     if stop_event.is_set():
                         return
@@ -132,7 +132,7 @@ class GatewayShard:
                     elif message.type in (WSMsgType.CLOSE, WSMsgType.CLOSED):
                         self._close_code = ws.close_code
                         _log.info(
-                            "[viseron-botpy] shard [%s/%s] closed code=%s",
+                            "[viseron_qqbotpy] shard [%s/%s] closed code=%s",
                             self.shard_id,
                             self.shard_count,
                             self._close_code,
@@ -142,7 +142,7 @@ class GatewayShard:
                         continue
 
                     if self._reconnect_requested:
-                        _log.info("[viseron-botpy] server requested reconnect")
+                        _log.info("[viseron_qqbotpy] server requested reconnect")
                         return
         finally:
             if self._reconnect_requested and self._close_code is None:
@@ -177,16 +177,16 @@ class GatewayShard:
             return
 
         if op == OP_HEARTBEAT_ACK:
-            _log.debug("[viseron-botpy] heartbeat ack")
+            _log.debug("[viseron_qqbotpy] heartbeat ack")
             return
 
         if op == OP_RECONNECT:
-            _log.info("[viseron-botpy] server asked to reconnect")
+            _log.info("[viseron_qqbotpy] server asked to reconnect")
             self._reconnect_requested = True
             return
 
         if op == OP_INVALID_SESSION:
-            _log.warning("[viseron-botpy] invalid session")
+            _log.warning("[viseron_qqbotpy] invalid session")
             self.session_id = None
             self.seq = None
             self._reconnect_requested = True
@@ -213,13 +213,13 @@ class GatewayShard:
                 self.shard_id = int(shard[0])
                 self.shard_count = int(shard[1])
         elif event == "resumed":
-            _log.info("[viseron-botpy] shard [%s/%s] resumed", self.shard_id, self.shard_count)
+            _log.info("[viseron_qqbotpy] shard [%s/%s] resumed", self.shard_id, self.shard_count)
 
         parser = self.dispatcher.parsers.get(event)
         if parser is not None:
             parser(payload)
         else:
-            _log.debug("[viseron-botpy] no parser for event %s", event_type)
+            _log.debug("[viseron_qqbotpy] no parser for event %s", event_type)
 
     async def _send_identify(self) -> None:
         token = await self.token_manager.get_access_token()
@@ -265,7 +265,7 @@ class GatewayShard:
                 try:
                     await self._send_heartbeat()
                 except Exception as exc:  # noqa: BLE001 - heartbeat is best-effort
-                    _log.debug("[viseron-botpy] heartbeat send failed: %s", exc)
+                    _log.debug("[viseron_qqbotpy] heartbeat send failed: %s", exc)
         except asyncio.CancelledError:
             pass
 

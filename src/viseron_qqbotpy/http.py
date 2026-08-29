@@ -101,7 +101,7 @@ class HTTPClient:
             ) as response:
                 return await self._handle_response(response)
         except (aiohttp.ClientConnectionError, asyncio.TimeoutError) as exc:
-            _log.warning("[viseron-botpy] request retry %s/2 for %s: %s", retry + 1, route, exc)
+            _log.warning("[viseron_qqbotpy] request retry %s/2 for %s: %s", retry + 1, route, exc)
             await asyncio.sleep(min(0.5 * (2 ** retry), 2.0))
             return await self.request(route, retry=retry + 1, **kwargs)
 
@@ -131,7 +131,7 @@ class HTTPClient:
         error = APIError.from_response(status, payload, url=url)
         error.trace_id = error.trace_id or trace_id
         _log.error(
-            "[viseron-botpy] API error url=%s status=%s code=%s trace_id=%s message=%s",
+            "[viseron_qqbotpy] API error url=%s status=%s code=%s trace_id=%s message=%s",
             url,
             status,
             error.code,

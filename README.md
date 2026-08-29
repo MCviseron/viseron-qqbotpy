@@ -47,7 +47,7 @@
     # 读取项目根目录的 .env
     load_env(Path(__file__).resolve().parents[1] / ".env")
 
-    # 使用 SDK 默认日志格式，并写入 logs/viseron-botpy.log
+    # 使用 SDK 默认日志格式，并写入 logs/viseron_qqbotpy.log
     configure_logging()
 
     APPID = os.getenv("APPID", "")

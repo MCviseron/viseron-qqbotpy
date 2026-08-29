@@ -3,7 +3,7 @@
 The SDK configures its own logger automatically on first use:
 
 * console output uses the project's default coloured format
-* a rotating log file is written to logs/viseron-botpy.log
+* a rotating log file is written to logs/viseron_qqbotpy.log
 
 Applications can override this behaviour with configure_logging().
 """
@@ -18,7 +18,7 @@ from typing import Optional
 __all__ = ["configure_logging", "get_logger"]
 
 _LOGGER_NAME = "viseron_qqbotpy"
-_DEFAULT_LOG_FILE = "logs/viseron-botpy.log"
+_DEFAULT_LOG_FILE = "logs/viseron_qqbotpy.log"
 
 _CONSOLE_FORMAT = (
     "\033[33m[%(levelname)s]    (%(filename)s:%(lineno)d)%(funcName)s\033[0m    "
@@ -54,7 +54,7 @@ def configure_logging(
         level:
             Log level for the SDK logger.
         log_file:
-            Log file path.  Defaults to logs/viseron-botpy.log.
+            Log file path.  Defaults to logs/viseron_qqbotpy.log.
         console_format:
             Optional custom console format.  When None, the SDK default is used.
         file_format:

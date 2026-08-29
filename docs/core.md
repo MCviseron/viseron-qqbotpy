@@ -248,10 +248,10 @@ SDK 会为自己的 logger 提供默认日志配置。
 
 - 控制台输出格式为：
 
-    [INFO]    (gateway.py:行号)函数名    [viseron-botpy]  日志信息
+    [INFO]    (gateway.py:行号)函数名    [viseron_qqbotpy]  日志信息
 
 - 控制台中的 [INFO] 为黄色，后面的日志信息为白色。
-- 同时在磁盘写入 logs/viseron-botpy.log。
+- 同时在磁盘写入 logs/viseron_qqbotpy.log。
 - 日志文件使用 RotatingFileHandler，默认单文件 5 MB，最多保留 5 个旧文件。
 - SDK 不会调用 logging.basicConfig，不会影响其他 logger。
 
@@ -280,7 +280,7 @@ SDK 提供 configure_logging：
 参数说明：
 
 - level：日志级别，默认 INFO。
-- log_file：日志文件路径，默认 logs/viseron-botpy.log。
+- log_file：日志文件路径，默认 logs/viseron_qqbotpy.log。
 - console_format：控制台格式，None 表示使用 SDK 默认格式。
 - file_format：文件格式，None 表示使用 SDK 默认格式。
 - use_console：是否输出到控制台。
