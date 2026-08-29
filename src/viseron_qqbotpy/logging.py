@@ -21,8 +21,7 @@ _LOGGER_NAME = "viseron_qqbotpy"
 _DEFAULT_LOG_FILE = "logs/viseron-botpy.log"
 
 _CONSOLE_FORMAT = (
-    "\033[33m[%(levelname)s]\033[0m    "
-    "(%(filename)s:%(lineno)d)%(funcName)s    "
+    "\033[33m[%(levelname)s]    (%(filename)s:%(lineno)d)%(funcName)s\033[0m    "
     "\033[37m%(message)s\033[0m"
 )
 _FILE_FORMAT = "[%(levelname)s]    (%(filename)s:%(lineno)d)%(funcName)s    %(message)s"
