@@ -1322,24 +1322,57 @@
 
 ### 11.3 群聊富媒体上传
 
-功能说明：使用已经上传好的资源 URL，向群聊发送富媒体消息。
+功能说明：上传图片、视频、语音或文件到群聊，并返回 file_info。file_info 用于后续发送消息接口的 media 字段。
 
 参数来源：
 
 - group_openid：目标群 OpenID。
-- file_type：媒体类型。
-- url：资源 URL。
-- srv_send_msg：为 True 时直接发送消息，会占用主动消息频次。
-- upload_id 和 file_name：可选，与上传任务关联。
+- file_type：媒体类型，1 图片，2 视频，3 语音，4 文件。
+- url：媒体资源 URL，需以 http 开头，平台会下载转存。分片上传合并时可为空。
+- srv_send_msg：True 表示直接发送消息并占用主动消息频次；False 表示只上传并返回 file_info。
+- upload_id：分片上传任务 ID，来自预上传接口。
+- file_name：文件名，可选。
 
-示例：
+直接发送示例：
 
-    await self.api.post_group_file(
+    result = await self.api.post_group_file(
         group_openid="群 OpenID",
         file_type=1,
-        url="资源 URL",
+        url="https://example.com/image.png",
+        srv_send_msg=True,
+    )
+
+    # srv_send_msg=True 时，返回中包含 id，即发送的消息 ID
+    print(result["id"])
+
+只上传不直接发送：
+
+    result = await self.api.post_group_file(
+        group_openid="群 OpenID",
+        file_type=1,
+        url="https://example.com/image.png",
         srv_send_msg=False,
     )
+
+    # 此时只返回文件信息，不直接发送
+    file_info = result["file_info"]
+
+    # 再通过群消息接口发送富媒体
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=7,
+        media={"file_info": file_info},
+    )
+
+返回内容：
+
+- file_uuid：文件唯一 ID。
+- file_info：文件信息，用于发送消息接口的 media.file_info 字段，直接透传即可。
+- ttl：file_info 有效期秒数，0 表示可长期使用。
+- id：仅 srv_send_msg=True 时返回，表示发送的消息 ID。
+- raw_url：仅分片上传合并且文件类型为图片/视频/语音时返回。
+
+注意：用群接口上传的文件只能发送到群聊。
 
 ### 11.4 单聊富媒体预上传
 
@@ -1386,23 +1419,57 @@
 
 ### 11.6 单聊富媒体上传
 
-功能说明：使用已经上传好的资源 URL，向用户发送单聊富媒体消息。
+功能说明：上传图片、视频、语音或文件到单聊，并返回 file_info。file_info 用于后续发送消息接口的 media 字段。
 
 参数来源：
 
 - openid：目标用户的 user_openid。
-- file_type：媒体类型。
-- url：资源 URL。
-- srv_send_msg：为 True 时直接发送消息。
+- file_type：媒体类型，1 图片，2 视频，3 语音，4 文件。
+- url：媒体资源 URL，需以 http 开头，平台会下载转存。分片上传合并时可为空。
+- srv_send_msg：True 表示直接发送消息并占用主动消息频次；False 表示只上传并返回 file_info。
+- upload_id：分片上传任务 ID，来自预上传接口。
+- file_name：文件名，可选。
 
-示例：
+直接发送示例：
 
-    await self.api.post_c2c_file(
+    result = await self.api.post_c2c_file(
         openid="用户 OpenID",
         file_type=1,
-        url="资源 URL",
+        url="https://example.com/image.png",
+        srv_send_msg=True,
+    )
+
+    # srv_send_msg=True 时，返回中包含 id，即发送的消息 ID
+    print(result["id"])
+
+只上传不直接发送：
+
+    result = await self.api.post_c2c_file(
+        openid="用户 OpenID",
+        file_type=1,
+        url="https://example.com/image.png",
         srv_send_msg=False,
     )
+
+    # 此时只返回文件信息，不直接发送
+    file_info = result["file_info"]
+
+    # 再通过单聊消息接口发送富媒体
+    await self.api.post_c2c_message(
+        openid="用户 OpenID",
+        msg_type=7,
+        media={"file_info": file_info},
+    )
+
+返回内容：
+
+- file_uuid：文件唯一 ID。
+- file_info：文件信息，用于发送消息接口的 media.file_info 字段，直接透传即可。
+- ttl：file_info 有效期秒数，0 表示可长期使用。
+- id：仅 srv_send_msg=True 时返回，表示发送的消息 ID。
+- raw_url：仅分片上传合并且文件类型为图片/视频/语音时返回。
+
+注意：用单聊接口上传的文件只能发送到单聊。
 
 ## 12. 自定义菜单与指令面板
 
