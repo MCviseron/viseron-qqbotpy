@@ -77,6 +77,9 @@
 
 注意：填写 markdown 后，content 等文本字段应为空，避免消息内容冲突。
 
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
+
 ### 1.4 发送内嵌键盘
 
 功能说明：在消息下方附带一个内嵌键盘，用户点击按钮后会触发互动事件。
@@ -118,6 +121,9 @@
 
 注意：按钮点击后会收到 INTERACTION_CREATE 事件，需要用 on_interaction_result 响应。
 
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
+
 ### 1.5 发送 Embed
 
 功能说明：发送 Embed 结构化消息。Embed 是一种特殊的 Ark 消息，适合展示标题、描述和字段。
@@ -141,6 +147,9 @@
     )
 
 注意：embed、ark、markdown、content 等消息类型通常选择一种使用。
+
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
 
 ### 1.6 发送 Ark
 
@@ -167,6 +176,9 @@
         ark=ark,
     )
 
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
+
 ### 1.7 发送网络图片
 
 功能说明：通过图片 URL 向子频道发送图片。平台会转存该图片。
@@ -182,6 +194,9 @@
         channel_id="子频道 ID",
         image="https://example.com/image.png",
     )
+
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
 
 ### 1.8 发送本地图片
 
@@ -210,6 +225,9 @@
     )
 
 注意：file_image 会使用 multipart/form-data 上传，不要与 image 同时使用。
+
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
 
 ### 1.9 引用回复
 
@@ -306,6 +324,9 @@
         content="你好",
     )
 
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
+
 ### 2.3 回复私信事件
 
 功能说明：收到用户私信时，平台推送 DIRECT_MESSAGE_CREATE 事件。SDK 会传入 DirectMessage 对象，可直接使用 reply 回复。
@@ -365,6 +386,9 @@
         content="大家好",
     )
 
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
+
 ### 3.3 发送群 Markdown
 
 功能说明：向指定群发送 Markdown 消息。
@@ -383,6 +407,9 @@
         markdown={"content": "# 标题
 正文"},
     )
+
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
 
 ### 3.4 撤回群消息
 
@@ -435,6 +462,9 @@
         msg_type=0,
         content="你好",
     )
+
+
+返回内容：返回 Message 对象，其中 id 是消息 ID。
 
 ### 3.7 撤回单聊消息
 
@@ -985,6 +1015,9 @@
 
     threads = await self.api.get_threads("论坛子频道 ID")
 
+
+返回内容：返回帖子列表。
+
 ### 8.7 删除帖子
 
 功能说明：删除论坛子频道中的指定帖子。
@@ -1030,6 +1063,9 @@
 示例：
 
     pins = await self.api.get_pins("子频道 ID")
+
+
+返回内容：返回当前子频道内的精华消息列表。
 
 ### 8.10 删除精华消息
 
@@ -1151,6 +1187,9 @@
 
     state = await self.api.get_group_bot_state("群 OpenID")
 
+
+返回内容：返回机器人在群内的状态信息。
+
 ### 10.3 拉取入群申请列表
 
 功能说明：拉取指定群的入群申请记录，用于后续审批。
@@ -1234,6 +1273,9 @@
 
     setting = await self.api.get_group_restrict_chat_setting("群 OpenID")
     print(setting)
+
+
+返回内容：返回群禁言设置状态。
 
 ### 10.7 入群自动审批策略
 
@@ -1395,6 +1437,9 @@
         md5_10m="分片 MD5",
     )
 
+
+返回内容：返回 upload_id、分片大小和上传地址等信息。
+
 ### 11.5 单聊分片上传完成
 
 功能说明：通知平台完成单聊富媒体的某个分片上传。
@@ -1509,6 +1554,9 @@
 
     await self.api.update_menu(menu)
 
+
+返回内容：成功时无业务返回，不抛异常即表示成功。
+
 ### 12.3 查询指令面板列表
 
 功能说明：查询已创建的指令面板列表。
@@ -1569,6 +1617,9 @@
         panel_id="面板 ID",
         panel={"items": []},
     )
+
+
+返回内容：成功时无业务返回，不抛异常即表示成功。
 
 ### 12.6 删除指令面板
 
