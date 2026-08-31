@@ -1416,6 +1416,27 @@
 
 注意：用群接口上传的文件只能发送到群聊。
 
+SDK 已封装分片上传流程，可以直接上传本地文件并返回结果：
+
+    result = await self.api.upload_group_media(
+        group_id="群 ID",
+        group_openid="群 OpenID",
+        file_path="D:/images/test.png",
+        file_type=1,
+        srv_send_msg=False,
+    )
+
+    # 只上传时，用返回的 file_info 发送消息
+    file_info = result["file_info"]
+
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=7,
+        media={"file_info": file_info},
+    )
+
+如果 srv_send_msg=True，则 upload_group_media 会直接发送消息，返回结果中包含消息 id。
+
 ### 11.4 单聊富媒体预上传
 
 功能说明：向平台申请单聊富媒体上传任务。
@@ -1515,6 +1536,27 @@
 - raw_url：仅分片上传合并且文件类型为图片/视频/语音时返回。
 
 注意：用单聊接口上传的文件只能发送到单聊。
+
+SDK 已封装分片上传流程，可以直接上传本地文件并返回结果：
+
+    result = await self.api.upload_c2c_media(
+        user_id="用户 ID",
+        user_openid="用户 OpenID",
+        file_path="D:/images/test.png",
+        file_type=1,
+        srv_send_msg=False,
+    )
+
+    # 只上传时，用返回的 file_info 发送消息
+    file_info = result["file_info"]
+
+    await self.api.post_c2c_message(
+        openid="用户 OpenID",
+        msg_type=7,
+        media={"file_info": file_info},
+    )
+
+如果 srv_send_msg=True，则 upload_c2c_media 会直接发送消息，返回结果中包含消息 id。
 
 ## 12. 自定义菜单与指令面板
 

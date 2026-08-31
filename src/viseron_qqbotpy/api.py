@@ -7,10 +7,13 @@ None.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from io import BufferedReader
 from typing import Any, BinaryIO, Dict, List, Optional, Union
 
+import aiohttp
 from aiohttp import FormData
 
 from .http import HTTPClient, Route
@@ -677,7 +680,7 @@ class BotAPI:
         self,
         group_openid: str,
         file_type: int,
-        url: str,
+        url: Optional[str] = None,
         srv_send_msg: bool = False,
         file_name: Optional[str] = None,
         upload_id: Optional[str] = None,
@@ -809,7 +812,7 @@ class BotAPI:
         self,
         openid: str,
         file_type: int,
-        url: str,
+        url: Optional[str] = None,
         srv_send_msg: bool = False,
         file_name: Optional[str] = None,
         upload_id: Optional[str] = None,
@@ -914,3 +917,145 @@ class BotAPI:
 
     async def create_url_link(self, url_link: str) -> Any:
         return await self._post("/v2/generate_url_link", json={"url_link": url_link})
+
+    # ------------------------------------------------------------------ #
+    # high-level chunked media upload
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _compute_file_digests(file_path: str):
+        """Return (file_size, md5, sha1, md5_10m) for a local file."""
+        prefix_size = 10002432
+        with open(file_path, "rb") as handle:
+            prefix = handle.read(prefix_size)
+
+        md5_10m = hashlib.md5(prefix).hexdigest()
+        md5 = hashlib.md5()
+        sha1 = hashlib.sha1()
+        file_size = 0
+
+        with open(file_path, "rb") as handle:
+            while True:
+                chunk = handle.read(1024 * 1024)
+                if not chunk:
+                    break
+                file_size += len(chunk)
+                md5.update(chunk)
+                sha1.update(chunk)
+
+        return file_size, md5.hexdigest(), sha1.hexdigest(), md5_10m
+
+    async def _upload_chunks(self, file_path: str, parts: List[Any], on_part) -> None:
+        async with aiohttp.ClientSession() as session:
+            with open(file_path, "rb") as handle:
+                for part in parts:
+                    index = part["index"]
+                    url = part["presigned_url"]
+                    block_size = int(part["block_size"])
+
+                    data = handle.read(block_size)
+                    if not data:
+                        break
+
+                    async with session.put(url, data=data) as response:
+                        response.raise_for_status()
+
+                    part_md5 = hashlib.md5(data).hexdigest()
+                    await on_part(index=index, size=len(data), part_md5=part_md5)
+
+    async def upload_group_media(
+        self,
+        group_id: str,
+        group_openid: str,
+        file_path: str,
+        file_type: int,
+        srv_send_msg: bool = False,
+    ) -> Any:
+        """Upload a local file to group chat using the chunked upload flow.
+
+        This is a convenience wrapper around upload_prepare, chunk PUT,
+        upload_part_finish and the files endpoint.  It returns the same value
+        as post_group_file, so callers can read result["file_info"] when
+        srv_send_msg=False, or result["id"] when srv_send_msg=True.
+        """
+        file_size, md5, sha1, md5_10m = self._compute_file_digests(file_path)
+
+        prepare = await self.post_group_upload_prepare(
+            group_id=group_id,
+            file_type=file_type,
+            file_size=str(file_size),
+            file_name=os.path.basename(file_path),
+            md5=md5,
+            sha1=sha1,
+            md5_10m=md5_10m,
+        )
+
+        upload_id = prepare["upload_id"]
+        parts = prepare.get("parts", [])
+
+        async def finish_part(index: int, size: int, part_md5: str) -> None:
+            await self.post_group_upload_part_finish(
+                group_id=group_id,
+                upload_id=upload_id,
+                part_index=index,
+                block_size=str(size),
+                md5=part_md5,
+            )
+
+        await self._upload_chunks(file_path, parts, finish_part)
+
+        return await self.post_group_file(
+            group_openid=group_openid,
+            file_type=file_type,
+            upload_id=upload_id,
+            file_name=os.path.basename(file_path),
+            srv_send_msg=srv_send_msg,
+        )
+
+    async def upload_c2c_media(
+        self,
+        user_id: str,
+        user_openid: str,
+        file_path: str,
+        file_type: int,
+        srv_send_msg: bool = False,
+    ) -> Any:
+        """Upload a local file to C2C chat using the chunked upload flow.
+
+        This is a convenience wrapper around upload_prepare, chunk PUT,
+        upload_part_finish and the files endpoint.  It returns the same value
+        as post_c2c_file, so callers can read result["file_info"] when
+        srv_send_msg=False, or result["id"] when srv_send_msg=True.
+        """
+        file_size, md5, sha1, md5_10m = self._compute_file_digests(file_path)
+
+        prepare = await self.post_c2c_upload_prepare(
+            user_id=user_id,
+            file_type=file_type,
+            file_size=str(file_size),
+            file_name=os.path.basename(file_path),
+            md5=md5,
+            sha1=sha1,
+            md5_10m=md5_10m,
+        )
+
+        upload_id = prepare["upload_id"]
+        parts = prepare.get("parts", [])
+
+        async def finish_part(index: int, size: int, part_md5: str) -> None:
+            await self.post_c2c_upload_part_finish(
+                user_id=user_id,
+                upload_id=upload_id,
+                part_index=index,
+                block_size=str(size),
+                md5=part_md5,
+            )
+
+        await self._upload_chunks(file_path, parts, finish_part)
+
+        return await self.post_c2c_file(
+            openid=user_openid,
+            file_type=file_type,
+            upload_id=upload_id,
+            file_name=os.path.basename(file_path),
+            srv_send_msg=srv_send_msg,
+        )

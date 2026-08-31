@@ -7,7 +7,11 @@
 
 ## [Unreleased]
 
-- 暂无。
+### Added
+
+- 新增 upload_group_media：封装群聊富媒体分片上传流程，调用后直接返回 files 接口结果。
+- 新增 upload_c2c_media：封装单聊富媒体分片上传流程，调用后直接返回 files 接口结果。
+- post_group_file / post_c2c_file 的 url 参数改为可选，支持分片上传合并场景。
 
 ## [0.2.0] - 2026-08-30
 
