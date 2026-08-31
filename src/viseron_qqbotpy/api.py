@@ -964,7 +964,6 @@ class BotAPI:
 
     async def upload_group_media(
         self,
-        group_id: str,
         group_openid: str,
         file_path: str,
         file_type: int,
@@ -972,15 +971,13 @@ class BotAPI:
     ) -> Any:
         """Upload a local file to group chat using the chunked upload flow.
 
-        This is a convenience wrapper around upload_prepare, chunk PUT,
-        upload_part_finish and the files endpoint.  It returns the same value
-        as post_group_file, so callers can read result["file_info"] when
-        srv_send_msg=False, or result["id"] when srv_send_msg=True.
+        group_openid is the group OpenID.  It is used for both the chunked
+        upload endpoints and the final files endpoint.
         """
         file_size, md5, sha1, md5_10m = self._compute_file_digests(file_path)
 
         prepare = await self.post_group_upload_prepare(
-            group_id=group_id,
+            group_id=group_openid,
             file_type=file_type,
             file_size=str(file_size),
             file_name=os.path.basename(file_path),
@@ -994,7 +991,7 @@ class BotAPI:
 
         async def finish_part(index: int, size: int, part_md5: str) -> None:
             await self.post_group_upload_part_finish(
-                group_id=group_id,
+                group_id=group_openid,
                 upload_id=upload_id,
                 part_index=index,
                 block_size=str(size),
@@ -1013,7 +1010,6 @@ class BotAPI:
 
     async def upload_c2c_media(
         self,
-        user_id: str,
         user_openid: str,
         file_path: str,
         file_type: int,
@@ -1021,15 +1017,13 @@ class BotAPI:
     ) -> Any:
         """Upload a local file to C2C chat using the chunked upload flow.
 
-        This is a convenience wrapper around upload_prepare, chunk PUT,
-        upload_part_finish and the files endpoint.  It returns the same value
-        as post_c2c_file, so callers can read result["file_info"] when
-        srv_send_msg=False, or result["id"] when srv_send_msg=True.
+        user_openid is the user OpenID.  It is used for both the chunked
+        upload endpoints and the final files endpoint.
         """
         file_size, md5, sha1, md5_10m = self._compute_file_digests(file_path)
 
         prepare = await self.post_c2c_upload_prepare(
-            user_id=user_id,
+            user_id=user_openid,
             file_type=file_type,
             file_size=str(file_size),
             file_name=os.path.basename(file_path),
@@ -1043,7 +1037,7 @@ class BotAPI:
 
         async def finish_part(index: int, size: int, part_md5: str) -> None:
             await self.post_c2c_upload_part_finish(
-                user_id=user_id,
+                user_id=user_openid,
                 upload_id=upload_id,
                 part_index=index,
                 block_size=str(size),

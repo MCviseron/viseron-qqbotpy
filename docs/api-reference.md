@@ -91,7 +91,7 @@
 - post_group_file(group_openid, file_type, url, srv_send_msg, file_name, upload_id)：群聊富媒体上传
 - post_group_upload_prepare(group_id, file_type, file_size, file_name, md5, sha1, md5_10m)：群聊富媒体预上传
 - post_group_upload_part_finish(group_id, upload_id, part_index, block_size, md5)：群聊分片上传完成
-- upload_group_media(group_id, group_openid, file_path, file_type, srv_send_msg)：封装完整分片上传流程并返回 files 接口结果
+- upload_group_media(group_openid, file_path, file_type, srv_send_msg)：封装完整分片上传流程并返回 files 接口结果
 
 ## 9. 单聊消息与富媒体
 
@@ -101,7 +101,7 @@
 - post_c2c_file(openid, file_type, url, srv_send_msg, file_name, upload_id)：单聊富媒体上传
 - post_c2c_upload_prepare(user_id, file_type, file_size, file_name, md5, sha1, md5_10m)：单聊富媒体预上传
 - post_c2c_upload_part_finish(user_id, upload_id, part_index, block_size, md5)：单聊分片上传完成
-- upload_c2c_media(user_id, user_openid, file_path, file_type, srv_send_msg)：封装完整分片上传流程并返回 files 接口结果
+- upload_c2c_media(user_openid, file_path, file_type, srv_send_msg)：封装完整分片上传流程并返回 files 接口结果
 
 ## 10. 群管理
 

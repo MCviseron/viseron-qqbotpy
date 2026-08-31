@@ -13,6 +13,11 @@
 - 新增 upload_c2c_media：封装单聊富媒体分片上传流程，调用后直接返回 files 接口结果。
 - post_group_file / post_c2c_file 的 url 参数改为可选，支持分片上传合并场景。
 
+### Changed
+
+- upload_group_media 参数简化为只传 group_openid。
+- upload_c2c_media 参数简化为只传 user_openid。
+
 ## [0.2.0] - 2026-08-30
 
 ### Added
