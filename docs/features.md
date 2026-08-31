@@ -1558,6 +1558,130 @@ SDK 已封装分片上传流程，可以直接上传本地文件并返回结果�
 
 如果 srv_send_msg=True，则 upload_c2c_media 会直接发送消息，返回结果中包含消息 id。
 
+### 11.7 分片上传封装 API
+
+SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成、文件合并这四步全部包起来。调用后直接返回 files 接口的结果。
+
+#### 群聊分片上传
+
+方法：
+
+    upload_group_media(
+        group_id,
+        group_openid,
+        file_path,
+        file_type,
+        srv_send_msg=False,
+    )
+
+参数说明：
+
+- group_id：群 ID，用于预上传和分片完成接口。
+- group_openid：群 OpenID，用于最后的 files 接口。
+- file_path：本地文件路径。
+- file_type：媒体类型，1 图片，2 视频，3 语音，4 文件。
+- srv_send_msg：False 表示只上传并返回 file_info；True 表示直接发送消息。
+
+只上传，后续自行发送：
+
+    result = await self.api.upload_group_media(
+        group_id="群 ID",
+        group_openid="群 OpenID",
+        file_path="D:/images/test.png",
+        file_type=1,
+        srv_send_msg=False,
+    )
+
+    file_info = result["file_info"]
+
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=7,
+        media={"file_info": file_info},
+    )
+
+直接上传并发送：
+
+    result = await self.api.upload_group_media(
+        group_id="群 ID",
+        group_openid="群 OpenID",
+        file_path="D:/images/test.png",
+        file_type=1,
+        srv_send_msg=True,
+    )
+
+    print(result["id"])
+
+#### 单聊分片上传
+
+方法：
+
+    upload_c2c_media(
+        user_id,
+        user_openid,
+        file_path,
+        file_type,
+        srv_send_msg=False,
+    )
+
+参数说明：
+
+- user_id：用户 ID，用于预上传和分片完成接口。
+- user_openid：用户 OpenID，用于最后的 files 接口。
+- file_path：本地文件路径。
+- file_type：媒体类型，1 图片，2 视频，3 语音，4 文件。
+- srv_send_msg：False 表示只上传并返回 file_info；True 表示直接发送消息。
+
+只上传，后续自行发送：
+
+    result = await self.api.upload_c2c_media(
+        user_id="用户 ID",
+        user_openid="用户 OpenID",
+        file_path="D:/images/test.png",
+        file_type=1,
+        srv_send_msg=False,
+    )
+
+    file_info = result["file_info"]
+
+    await self.api.post_c2c_message(
+        openid="用户 OpenID",
+        msg_type=7,
+        media={"file_info": file_info},
+    )
+
+直接上传并发送：
+
+    result = await self.api.upload_c2c_media(
+        user_id="用户 ID",
+        user_openid="用户 OpenID",
+        file_path="D:/images/test.png",
+        file_type=1,
+        srv_send_msg=True,
+    )
+
+    print(result["id"])
+
+#### 内部流程
+
+封装方法内部会自动完成：
+
+1. 读取本地文件，计算文件大小、MD5、SHA1，以及前 10002432 字节的 MD5。
+2. 调用预上传接口，获取 upload_id 和分片列表 parts。
+3. 按 parts 中每个分片的 block_size 读取文件内容。
+4. 将每个分片 HTTP PUT 到对应的 presigned_url。
+5. 每片上传成功后，调用分片完成接口通知平台。
+6. 全部分片完成后，调用 files 接口合并文件并返回结果。
+
+#### 注意事项
+
+- 群聊和单聊的封装方法分别只能用于对应会话。
+- group_id 和 group_openid 是不同的 ID，调用群聊封装时需要同时提供。
+- user_id 和 user_openid 是不同的 ID，调用单聊封装时需要同时提供。
+- 分片预签名 URL 已经包含鉴权信息，SDK 在 PUT 分片时不会再添加 QQBot Authorization。
+- 如果文件较小，平台也可能返回一个或多个分片；封装方法会按返回的 parts 自动处理。
+- 文件类型和大小限制请参考平台文档。
+
 ## 12. 自定义菜单与指令面板
 
 ### 12.1 查询全局自定义菜单
