@@ -274,6 +274,10 @@ class Client:
             group_openid = getattr(obj, "group_openid", None)
             if group_openid:
                 self.group_store.ensure_group(group_openid)
+                group = self.group_store.get(group_openid)
+                if group is None or not group.get("group_name"):
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(self._enrich_group_info(group_openid))
 
     async def _enrich_group_info(self, group_openid: str) -> None:
         try:
