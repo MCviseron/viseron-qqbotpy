@@ -14,9 +14,11 @@ from typing import Any, Dict, List, Optional
 
 __all__ = ["GroupStore", "load_group_store"]
 
+_DEFAULT_TIMEZONE = timezone(timedelta(hours=8))
+
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(_DEFAULT_TIMEZONE).isoformat()
 
 
 class GroupStore:
@@ -125,7 +127,7 @@ class GroupStore:
         self.save()
 
     def cleanup_stale_inactive_groups(self) -> None:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=self.inactive_retention_days)
+        cutoff = datetime.now(_DEFAULT_TIMEZONE) - timedelta(days=self.inactive_retention_days)
         for group_openid in list(self.groups):
             group = self.groups[group_openid]
             if group.get("active", True):
