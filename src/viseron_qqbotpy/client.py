@@ -21,6 +21,7 @@ from .api import BotAPI
 from .dispatcher import EventDispatcher
 from .flags import Intents
 from .gateway import GatewayShard
+from .group_store import GroupStore
 from .http import HTTPClient
 from .logging import get_logger
 from .token import TokenManager
@@ -48,17 +49,22 @@ class Client:
         *,
         timeout: float = 5,
         is_sandbox: bool = False,
+        group_store_path: Optional[str] = None,
+        group_store_retention_days: int = 30,
     ) -> None:
         if not isinstance(intents, Intents):
             raise TypeError("intents must be an Intents instance")
         self.intents = intents
         self.timeout = timeout
         self.is_sandbox = is_sandbox
+        self.group_store_path = group_store_path or "groups.json"
+        self.group_store_retention_days = group_store_retention_days
 
         self.api: Optional[BotAPI] = None
         self._token: Optional[TokenManager] = None
         self._http: Optional[HTTPClient] = None
         self._dispatcher: Optional[EventDispatcher] = None
+        self.group_store: Optional[GroupStore] = None
         self._stop_event: Optional[asyncio.Event] = None
         self._tasks: list = []
         self._closed = False
@@ -120,6 +126,10 @@ class Client:
         self._http = HTTPClient(self._token, timeout=self.timeout, is_sandbox=self.is_sandbox)
         self.api = BotAPI(self._http)
         self._dispatcher = EventDispatcher(self.ws_dispatch, self.api)
+        self.group_store = GroupStore(
+            self.group_store_path,
+            inactive_retention_days=self.group_store_retention_days,
+        ).load()
 
         _log.info("[viseron_qqbotpy] logging in bot %s", appid)
         try:
@@ -226,6 +236,8 @@ class Client:
     # event dispatch
     # ------------------------------------------------------------------ #
     def ws_dispatch(self, event: str, *args: Any, **kwargs: Any) -> None:
+        self._record_group_event(event, *args)
+
         method_name = "on_" + event
         method = getattr(self, method_name, None)
         if method is None:
@@ -233,6 +245,45 @@ class Client:
             return
         loop = asyncio.get_running_loop()
         loop.create_task(self._run_event(method, method_name, *args, **kwargs), name=f"qqbot-{method_name}")
+
+    def _record_group_event(self, event: str, *args: Any) -> None:
+        if self.group_store is None:
+            return
+
+        obj = args[0] if args else None
+        if obj is None:
+            return
+
+        if event == "group_add_robot":
+            group_openid = getattr(obj, "group_openid", None)
+            if group_openid:
+                self.group_store.add_group(
+                    group_openid,
+                    added_by=getattr(obj, "op_member_openid", None),
+                    timestamp=getattr(obj, "timestamp", None),
+                )
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._enrich_group_info(group_openid))
+
+        elif event == "group_del_robot":
+            group_openid = getattr(obj, "group_openid", None)
+            if group_openid:
+                self.group_store.remove_group(group_openid)
+
+        elif event in ("group_at_message_create", "group_message_create"):
+            group_openid = getattr(obj, "group_openid", None)
+            if group_openid:
+                self.group_store.ensure_group(group_openid)
+
+    async def _enrich_group_info(self, group_openid: str) -> None:
+        try:
+            if self.api is None or self.group_store is None:
+                return
+            info = await self.api.get_group_info(group_openid)
+            if isinstance(info, dict):
+                self.group_store.update_group_info(group_openid, info)
+        except Exception as exc:  # noqa: BLE001 - enrichment is best-effort
+            _log.debug("[viseron_qqbotpy] could not enrich group info: %s", exc)
 
     async def _run_event(self, method: Callable[..., Coroutine[Any, Any, Any]], name: str, *args: Any, **kwargs: Any) -> None:
         try:

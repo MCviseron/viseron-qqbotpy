@@ -25,6 +25,7 @@
 - docs/features.md：常见功能实现示例
 - docs/api-reference.md：API 方法参考
 - docs/ext.md：命令装饰器、颜色转换等扩展
+- docs/management.md：面板与群管理、本地配置同步
 - docs/webhook.md：Webhook 签名验证
 - docs/publish.md：构建、上架 PyPI、安装与下载方式
 

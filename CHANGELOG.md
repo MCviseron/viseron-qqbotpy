@@ -12,11 +12,14 @@
 - 新增 upload_group_media：封装群聊富媒体分片上传流程，调用后直接返回 files 接口结果。
 - 新增 upload_c2c_media：封装单聊富媒体分片上传流程，调用后直接返回 files 接口结果。
 - post_group_file / post_c2c_file 的 url 参数改为可选，支持分片上传合并场景。
+- 新增 Panel / PanelItem / PanelStore / load_panels：高层指令面板管理，支持本地 panels.json 配置和启动同步。
+- 新增 GroupStore / load_group_store：本地群聊状态管理，支持启动自动初始化和群事件自动记录。
 
 ### Changed
 
 - upload_group_media 参数简化为只传 group_openid。
 - upload_c2c_media 参数简化为只传 user_openid。
+- Client 新增 group_store_path 和 group_store_retention_days 参数，用于自动管理 groups.json。
 
 ## [0.2.0] - 2026-08-30
 
