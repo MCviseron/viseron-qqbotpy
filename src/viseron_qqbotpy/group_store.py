@@ -109,9 +109,15 @@ class GroupStore:
             group_openid,
             {"group_openid": group_openid, "active": True},
         )
-        for key, value in info.items():
-            if key in ("name", "member_count", "max_members", "group_name", "bot_state"):
-                group[key] = value
+        # 保存平台返回的完整群信息，并补充常用别名字段。
+        group.update(info)
+        group["group_openid"] = group_openid
+
+        if "group_name" in info:
+            group["name"] = info["group_name"]
+        if "group_member_num" in info:
+            group["member_count"] = info["group_member_num"]
+
         group["last_seen"] = _now_iso()
         self.save()
 

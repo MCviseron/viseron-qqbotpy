@@ -26,6 +26,27 @@ def test_add_ensure_and_remove_group(tmp_path):
     assert store.all_active_group_openids() == []
 
 
+def test_update_group_info_saves_full_fields(tmp_path):
+    path = tmp_path / "groups.json"
+    store = GroupStore(str(path)).load()
+
+    store.add_group("group-1")
+    store.update_group_info("group-1", {
+        "group_name": "读书分享会",
+        "group_finger_memo": "每周共读一本好书",
+        "group_class_text": "文化",
+        "group_tags": ["阅读", "文学"],
+        "group_member_num": 256,
+    })
+
+    group = store.get("group-1")
+    assert group["group_name"] == "读书分享会"
+    assert group["name"] == "读书分享会"
+    assert group["group_member_num"] == 256
+    assert group["member_count"] == 256
+    assert group["group_finger_memo"] == "每周共读一本好书"
+
+
 def test_cleanup_stale_inactive_groups(tmp_path):
     path = tmp_path / "groups.json"
     store = GroupStore(str(path), inactive_retention_days=30).load()
