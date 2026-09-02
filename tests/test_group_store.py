@@ -41,10 +41,10 @@ def test_update_group_info_saves_full_fields(tmp_path):
 
     group = store.get("group-1")
     assert group["group_name"] == "读书分享会"
-    assert group["name"] == "读书分享会"
     assert group["group_member_num"] == 256
-    assert group["member_count"] == 256
     assert group["group_finger_memo"] == "每周共读一本好书"
+    assert "name" not in group
+    assert "member_count" not in group
 
 
 def test_cleanup_stale_inactive_groups(tmp_path):
