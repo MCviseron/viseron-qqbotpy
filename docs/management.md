@@ -79,7 +79,7 @@ Client 内置自动记录以下事件：
 
 - Panel：单个面板对象。
 - PanelStore：本地配置和平台面板同步。
-- load_panels：创建并加载 PanelStore，并自动同步一次本地配置到平台。
+- load_panels：创建并加载 PanelStore，只加载本地状态，不自动同步平台。
 
 ### 本地文件
 
@@ -156,10 +156,9 @@ panels.json 按 scope 分组。每个 scope 可以是一个对象，也可以是
     class MyBot(Client):
         async def on_ready(self):
             store = await load_panels(self.api, root_dir="panels")
+            await store.sync_from_config()
 
-load_panels 会自动执行一次同步。也可以之后手动调用：
-
-    await store.sync_from_config()
+load_panels 只负责加载本地状态。必须再调用 sync_from_config 才会创建或更新平台面板。
 
 sync_from_config 会：
 

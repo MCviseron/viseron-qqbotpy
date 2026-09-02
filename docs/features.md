@@ -1679,10 +1679,10 @@ SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成
 
     from viseron_qqbotpy import load_panels
 
-    # load_panels 会自动读取 panels/panels.json 并同步到平台。
+    # load_panels 只加载本地状态。
     store = await load_panels(self.api, root_dir="panels")
 
-    # 如果需要手动再次同步：
+    # 必须调用 sync_from_config 才会创建或更新平台面板。
     await store.sync_from_config()
 
 下面的 12.3 到 12.6 是底层 API，高阶管理推荐使用 Panel、PanelStore 和 load_panels。
