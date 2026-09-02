@@ -1673,6 +1673,20 @@ SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成
 
 ## 12. 自定义菜单与指令面板
 
+指令面板推荐使用高层管理能力，详见 docs/management.md。
+
+核心用法：
+
+    from viseron_qqbotpy import load_panels
+
+    # load_panels 会自动读取 panels/panels.json 并同步到平台。
+    store = await load_panels(self.api, root_dir="panels")
+
+    # 如果需要手动再次同步：
+    await store.sync_from_config()
+
+下面的 12.3 到 12.6 是底层 API，高阶管理推荐使用 Panel、PanelStore 和 load_panels。
+
 ### 12.1 查询全局自定义菜单
 
 功能说明：查询机器人当前的全局自定义菜单配置。
