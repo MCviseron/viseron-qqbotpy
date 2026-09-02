@@ -1173,7 +1173,7 @@
 
     info = await self.api.get_group_info("群 OpenID")
 
-返回内容：返回群名称、群号、机器人状态等基本信息。
+返回内容：返回 group_openid、group_name、group_finger_memo、group_class_text、group_tags、group_member_num 等群基本信息。
 
 ### 10.2 获取机器人群内状态
 
