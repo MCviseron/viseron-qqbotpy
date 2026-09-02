@@ -331,5 +331,11 @@ class PanelStore:
 
 
 async def load_panels(api: BotAPI, root_dir: str = "panels") -> PanelStore:
-    """Create and load a PanelStore instance."""
-    return PanelStore(api, root_dir=root_dir).load()
+    """Create, load and synchronise a PanelStore instance.
+
+    Calling this function will read panels/panels.json, create missing panels
+    on the platform, and update existing panels whose local config differs.
+    """
+    store = PanelStore(api, root_dir=root_dir).load()
+    await store.sync_from_config()
+    return store
