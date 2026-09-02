@@ -122,7 +122,7 @@
 
 - get_menu()：查询全局自定义菜单
 - update_menu(menu)：修改全局自定义菜单
-- get_panels()：查询指令面板列表
+- get_panels(scope)：按场景分页查询指令面板列表
 - create_panel(**fields)：创建指令面板
 - get_panel(panel_id)：查询指令面板详情
 - update_panel(panel_id, panel)：修改指令面板

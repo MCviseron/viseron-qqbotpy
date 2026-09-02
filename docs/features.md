@@ -1714,17 +1714,17 @@ SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成
 
 ### 12.3 查询指令面板列表
 
-功能说明：查询已创建的指令面板列表。
+功能说明：分页拉取指定场景下已生效的指令面板列表，按设置时间倒序排列。
 
 参数来源：
 
-- 无需额外参数。
+- scope：必填，生效场景，可选 c2c、group、channel、dm。
 
 示例：
 
-    panels = await self.api.get_panels()
+    panels = await self.api.get_panels(scope="group")
 
-返回内容：返回指令面板列表，每个面板包含 panel_id。
+返回内容：返回该场景下的指令面板列表，每个面板包含 panel_id。
 
 ### 12.4 创建指令面板
 

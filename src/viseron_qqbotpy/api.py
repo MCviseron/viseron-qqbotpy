@@ -897,8 +897,8 @@ class BotAPI:
     async def update_menu(self, menu: Any) -> Any:
         return await self._put("/v2/menu", json={"menu": menu})
 
-    async def get_panels(self) -> Any:
-        return await self._get("/v2/panels")
+    async def get_panels(self, scope: str) -> Any:
+        return await self._get("/v2/panels", params={"scope": scope})
 
     async def create_panel(self, **fields: Any) -> Any:
         return await self._post("/v2/panels", json=fields)

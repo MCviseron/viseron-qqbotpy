@@ -245,7 +245,7 @@ class PanelStore:
         target_type: str,
         remark: str,
     ) -> Optional[Panel]:
-        panels = await self.api.get_panels()
+        panels = await self.api.get_panels(scope)
         if not isinstance(panels, list):
             return None
 
