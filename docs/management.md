@@ -91,12 +91,55 @@ Client 内置自动记录以下事件：
 
 panels.json 按 scope 分组。每个 scope 可以是一个对象，也可以是一个数组。
 
+scope 可选：
+
+- c2c：单聊
+- group：群聊
+- channel：文字子频道
+- dm：频道私信
+
+其中 c2c 场景使用 user_openids 关联用户，group 场景使用 group_openids 关联群。
+
 全局面板示例：
 
     {
       "group": {
         "target_type": "all",
         "remark": "群聊默认面板",
+        "items": [
+          {
+            "type": "command",
+            "name": "签到",
+            "desc": "每日签到"
+          }
+        ]
+      }
+    }
+
+单聊全局面板示例：
+
+    {
+      "c2c": {
+        "target_type": "all",
+        "remark": "单聊默认面板",
+        "items": [
+          {
+            "type": "command",
+            "name": "帮助",
+            "desc": "查看帮助"
+          }
+        ]
+      }
+    }
+
+单聊指定用户面板示例：
+
+    {
+      "c2c": {
+        "key": "vip_user",
+        "target_type": "specific",
+        "remark": "VIP 用户面板",
+        "user_openids": ["用户 OpenID 1", "用户 OpenID 2"],
         "items": [
           {
             "type": "command",
