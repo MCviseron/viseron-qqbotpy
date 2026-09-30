@@ -34,6 +34,8 @@ Client 内置自动记录以下事件：
 
 你不需要手动调用，SDK 会在调用你的 on_group_add_robot 等回调之前完成记录。
 
+群记录缺少群名称等资料时，SDK 会自动调用 get_group_info 补全，并把平台返回的字段原样写入 groups.json。
+
 ### groups.json 示例
 
     {
@@ -42,13 +44,17 @@ Client 内置自动记录以下事件：
         "群 OpenID": {
           "group_openid": "群 OpenID",
           "active": true,
-          "added_at": "2026-08-30T12:00:00+00:00",
+          "added_at": "2026-08-30T12:00:00+08:00",
           "added_by": "操作者 OpenID",
-          "last_seen": "2026-08-30T12:00:00+00:00",
-          "name": "群名称"
+          "last_seen": "2026-08-30T12:00:00+08:00",
+          "group_name": "群名称",
+          "group_finger_memo": "群简介",
+          "group_member_num": 256
         }
       }
     }
+
+时间字段统一使用 UTC+8 时区。
 
 ### 手动使用 GroupStore
 
@@ -59,7 +65,7 @@ Client 内置自动记录以下事件：
     store.add_group("群 OpenID")
     store.ensure_group("群 OpenID")
     store.remove_group("群 OpenID")
-    store.update_group_info("群 OpenID", {"name": "新群名"})
+    store.update_group_info("群 OpenID", {"group_name": "新群名"})
 
     active_groups = store.all_active_group_openids()
 

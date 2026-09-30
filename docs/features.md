@@ -1310,6 +1310,128 @@
     # 删除策略
     await self.api.delete_group_join_approval_strategy("策略 ID")
 
+### 10.8 获取群成员列表
+
+功能说明：分页拉取群成员列表，每页最多返回 30 条。该接口是平台文档 2026-09-03 新增的群成员管理能力，当前处于内邀白名单阶段，未开通时返回错误码 11253。
+
+参数来源：
+
+- group_openid：群 OpenID。
+- cursor：分页游标，首次请求可不传；后续传上一次响应里的 next_cursor。
+
+示例：
+
+    page = await self.api.get_group_members("群 OpenID")
+    for member in page["members"]:
+        print(member["member_openid"], member["username"], member["member_role"])
+
+    # 取下一页；next_cursor 为空串表示已到末页
+    if page["next_cursor"]:
+        page = await self.api.get_group_members("群 OpenID", cursor=page["next_cursor"])
+
+返回内容：members 成员列表与 next_cursor 游标。每个成员包含 member_openid、username、member_role（member 普通成员 / owner 群主 / admin 管理员）、bot、joined_at、union_openid。
+
+注意事项：
+
+- 只能列举机器人可见的群成员，不保证包含全部成员。
+- 接口频率限制 60 QPM。
+
+### 10.9 获取群成员信息
+
+功能说明：查询单个群成员的详细信息。平台文档 2026-09-03 新增，当前为内邀白名单能力。
+
+参数来源：
+
+- group_openid：群 OpenID。
+- member_openid：群成员 OpenID，可取自群事件的 author.member_openid 或群成员列表。
+
+示例：
+
+    member = await self.api.get_group_member(
+        group_openid="群 OpenID",
+        member_openid="成员 OpenID",
+    )
+    print(member["username"], member["member_role"])
+
+返回内容：member_openid、username、member_role、bot、joined_at、union_openid。
+
+注意事项：接口频率限制 30 QPM。
+
+### 10.10 群成员批量移除
+
+功能说明：一次最多移除 20 个群成员，可选择同时把他们加入群黑名单。平台文档 2026-09-03 新增，当前为内邀白名单能力。
+
+参数来源：
+
+- group_openid：群 OpenID。
+- member_openids：要移除的成员 OpenID 列表，单次最多 20 个。
+- add_to_member_blacklist：是否同时加入群黑名单，默认 False。
+
+示例：
+
+    result = await self.api.batch_remove_group_members(
+        group_openid="群 OpenID",
+        member_openids=["成员 A", "成员 B"],
+        add_to_member_blacklist=True,
+    )
+    print(result["remove_members_result"])                 # success
+    print(result["add_to_member_blacklist_fail_openids"])  # 拉黑失败的 openid
+
+返回内容：remove_members_result（成功为 success）与 add_to_member_blacklist_fail_openids。
+
+注意事项：需要机器人具备群管理权限；接口频率限制 30 QPM。
+
+### 10.11 群黑名单查询
+
+功能说明：分页查询群黑名单列表。平台文档 2026-09-03 新增，当前为内邀白名单能力。
+
+参数来源：
+
+- group_openid：群 OpenID。
+- cursor：分页游标，首次请求可不传。
+- limit：单页数量，默认 20，最大 100。
+
+示例：
+
+    page = await self.api.get_group_member_blacklist("群 OpenID", limit=50)
+    for user in page["users"]:
+        print(user["member_openid"], user["username"], user["banned_at"])
+
+返回内容：users 黑名单用户列表与 next_cursor。每条包含 union_openid、member_openid、username、banned_at、bot。
+
+### 10.12 群黑名单操作
+
+功能说明：把成员加入或移出群黑名单。平台文档 2026-09-03 新增，当前为内邀白名单能力。
+
+参数来源：
+
+- group_openid：群 OpenID。
+- op：操作类型，add 加入黑名单，del 移出黑名单。
+- member_openids：目标成员 OpenID 列表，单次最多 20 个。
+
+示例：
+
+    # 加入黑名单（目标成员必须不在群中）
+    await self.api.update_group_member_blacklist(
+        group_openid="群 OpenID",
+        op="add",
+        member_openids=["成员 OpenID"],
+    )
+
+    # 移出黑名单
+    await self.api.update_group_member_blacklist(
+        group_openid="群 OpenID",
+        op="del",
+        member_openids=["成员 OpenID"],
+    )
+
+返回内容：fail_openids，操作失败的 openid 列表；全部成功时为空数组。
+
+注意事项：
+
+- 只有在目标用户不在群中时才能加入群黑名单，否则该 openid 会出现在 fail_openids 里。
+- 接口频率限制 60 QPM。
+
 ## 11. 富媒体上传
 
 富媒体上传用于向群聊或单聊发送图片、视频、语音等文件。完整流程通常包括预上传、分片上传、最后调用 files 接口发送。
@@ -1746,30 +1868,33 @@ SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成
 
 参数来源：
 
-- scope：作用范围，如 group。
-- target_type：目标类型，如 group。
-- group_openids 或 user_openids：面板关联的群或用户。
-- panel：面板内容，包含 items 列表。
+- scope：作用范围，可选 c2c、group、channel、dm。
+- target_type：目标类型，all 表示全量生效，specific 表示只对 user_openids 或 group_openids 生效。
+- group_openids 或 user_openids：target_type 为 specific 时，面板关联的群或用户。
+- panel：面板内容，包含 items 和 remark；每个 item 的 type 可选 command 或 link。
 
 示例：
 
     panel = await self.api.create_panel(
         scope="group",
-        target_type="group",
+        target_type="specific",
         group_openids=["群 OpenID"],
         panel={
             "items": [
                 {
+                    "type": "command",
                     "name": "签到",
                     "desc": "每日签到",
-                    "type": "send_message",
                     "only_admin": False,
                 }
-            ]
+            ],
+            "remark": "群聊面板",
         },
     )
 
 返回内容：返回创建后的面板对象，包含 panel_id。
+
+注意：推荐使用 Panel / PanelStore 高层封装管理面板，详见 docs/management.md。
 
 ### 12.5 修改指令面板
 
@@ -1804,18 +1929,27 @@ SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成
 
 ## 13. 分享链接
 
-功能说明：生成一个 QQ 机器人分享链接，可用于引导用户添加机器人或进入会话。
+功能说明：生成一个 QQ 机器人分享链接，用于邀请用户把机器人添加为好友。
 
 参数来源：
 
-- url_link：要生成的链接地址。
+- callback_data：回传给机器人后台的数据，最长 32 字符，可不传。
 
 示例：
 
-    result = await self.api.create_url_link("https://example.com")
-    print(result)
+    result = await self.api.create_url_link(callback_data="custom_data_123")
+    print(result["data"]["url"])
 
-返回内容：返回生成后的分享链接或链接 ID。
+    # 不携带自定义参数
+    result = await self.api.create_url_link()
+
+返回内容：{"data": {"url": "生成的分享链接"}}。
+
+注意事项：
+
+- 平台在 2026-09-16 修正了该接口的请求与响应字段说明，请求字段是 callback_data，不是 url_link。
+- 旧签名 create_url_link("值") 与 create_url_link(url_link="值") 仍可用，值会作为 callback_data 发送，但建议改用 callback_data。
+- 接口频率限制 50 QPS。
 
 ## 14. 互动事件响应
 

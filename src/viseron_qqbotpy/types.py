@@ -22,6 +22,15 @@ __all__ = [
     "FileInfo",
     "GuildMemberPayload",
     "GuildPayload",
+    "GroupBlacklistUser",
+    "GroupMember",
+    "GroupMemberBlacklist",
+    "GroupMemberList",
+    "GroupMemberMuteState",
+    "GroupMuteRecurringRule",
+    "GroupMuteRule",
+    "GroupMuteScheduleRule",
+    "GroupRestrictChatSetting",
     "InputNotify",
     "Keyboard",
     "KeyboardContent",
@@ -231,3 +240,75 @@ class GuildMemberPayload(TypedDict, total=False):
     roles: List[str]
     joined_at: str
     guild_id: str
+
+
+class GroupMember(TypedDict, total=False):
+    """One entry of GET /v2/groups/{group_openid}/members."""
+
+    member_openid: str
+    username: str
+    member_role: str  # member | owner | admin
+    bot: bool
+    joined_at: str  # RFC3339
+    union_openid: str
+
+
+class GroupMemberList(TypedDict, total=False):
+    members: List[GroupMember]
+    next_cursor: str  # empty string means the last page
+
+
+class GroupBlacklistUser(TypedDict, total=False):
+    """One entry of GET /v2/groups/{group_openid}/member_blacklist."""
+
+    union_openid: str
+    member_openid: str
+    username: str
+    banned_at: str  # RFC3339
+    bot: bool
+
+
+class GroupMemberBlacklist(TypedDict, total=False):
+    users: List[GroupBlacklistUser]
+    next_cursor: str
+
+
+class GroupMuteScheduleRule(TypedDict, total=False):
+    """One fixed-time mute window inside a group mute rule."""
+
+    task_id: str
+    start_at: str  # RFC3339
+    end_at: str  # RFC3339
+    enabled: bool
+
+
+class GroupMuteRecurringRule(TypedDict, total=False):
+    """One recurring mute window inside a group mute rule."""
+
+    task_id: str
+    weekdays: List[int]  # 1=Monday ... 7=Sunday
+    start_time: str  # HH:mm, Beijing time
+    end_time: str  # HH:mm, Beijing time; smaller than start_time means overnight
+    enabled: bool
+
+
+class GroupMuteRule(TypedDict, total=False):
+    """The group-wide mute configuration."""
+
+    mode: str  # none | always | schedule
+    schedule_rules: List[GroupMuteScheduleRule]
+    recurring_rules: List[GroupMuteRecurringRule]
+
+
+class GroupMemberMuteState(TypedDict, total=False):
+    member_openid: str
+    mute_expire_at: str  # RFC3339
+    username: str
+    union_openid: str
+
+
+class GroupRestrictChatSetting(TypedDict, total=False):
+    """Response of GET /v2/groups/{group_openid}/restrict_chat_setting."""
+
+    global_rule: GroupMuteRule
+    members: List[GroupMemberMuteState]

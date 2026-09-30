@@ -775,6 +775,72 @@ class BotAPI:
             group_openid=group_openid,
         )
 
+    # ------------------------------------------------------------------ #
+    # group member management (platform docs 2026-09-03)
+    # ------------------------------------------------------------------ #
+    async def get_group_members(self, group_openid: str, cursor: Optional[str] = None) -> Any:
+        """List group members, at most 30 per page.
+
+        Pass the previous response's next_cursor to continue paging; an empty
+        next_cursor means the last page has been reached.  This endpoint is
+        whitelist-only on the platform (error 11253 means no access).
+        """
+        return await self._get(
+            "/v2/groups/{group_openid}/members",
+            params={"cursor": cursor},
+            group_openid=group_openid,
+        )
+
+    async def get_group_member(self, group_openid: str, member_openid: str) -> Any:
+        """Get the detail of one group member."""
+        return await self._get(
+            "/v2/groups/{group_openid}/members/{member_openid}",
+            group_openid=group_openid,
+            member_openid=member_openid,
+        )
+
+    async def batch_remove_group_members(
+        self,
+        group_openid: str,
+        member_openids: List[str],
+        add_to_member_blacklist: bool = False,
+    ) -> Any:
+        """Remove up to 20 group members in one call."""
+        payload = {
+            "member_openids": list(member_openids),
+            "add_to_member_blacklist": add_to_member_blacklist,
+        }
+        return await self._post(
+            "/v2/groups/{group_openid}/batch_remove_members",
+            json=payload,
+            group_openid=group_openid,
+        )
+
+    async def get_group_member_blacklist(
+        self, group_openid: str, cursor: Optional[str] = None, limit: int = 20
+    ) -> Any:
+        """Query the group member blacklist (default page size 20, max 100)."""
+        return await self._get(
+            "/v2/groups/{group_openid}/member_blacklist",
+            params={"cursor": cursor, "limit": limit},
+            group_openid=group_openid,
+        )
+
+    async def update_group_member_blacklist(
+        self, group_openid: str, op: str, member_openids: List[str]
+    ) -> Any:
+        """Add to ("add") or remove from ("del") the group member blacklist.
+
+        A member can only be added while they are no longer in the group.
+        Up to 20 openids per call; the response lists the openids that failed.
+        """
+        payload = {"op": op, "member_openids": list(member_openids)}
+        return await self._post(
+            "/v2/groups/{group_openid}/member_blacklist",
+            json=payload,
+            group_openid=group_openid,
+        )
+
     async def post_c2c_message(
         self,
         openid: str,
@@ -915,8 +981,24 @@ class BotAPI:
     async def update_panel_target(self, panel_id: str, **fields: Any) -> Any:
         return await self._put("/v2/panels/{panel_id}/target", json=fields, panel_id=panel_id)
 
-    async def create_url_link(self, url_link: str) -> Any:
-        return await self._post("/v2/generate_url_link", json={"url_link": url_link})
+    async def create_url_link(
+        self,
+        callback_data: Optional[str] = None,
+        *,
+        url_link: Optional[str] = None,
+    ) -> Any:
+        """Generate a share link that invites users to add the bot.
+
+        The platform request field is callback_data (at most 32 characters); it
+        is echoed back to the bot when a user adds it through the link.  The
+        response is {"data": {"url": "..."}}.
+
+        The parameter was documented as url_link before the platform corrected
+        its field reference on 2026-09-16.  url_link is still accepted as a
+        deprecated keyword alias so existing code keeps working.
+        """
+        data = callback_data if callback_data is not None else url_link
+        return await self._post("/v2/generate_url_link", json={"callback_data": data})
 
     # ------------------------------------------------------------------ #
     # high-level chunked media upload

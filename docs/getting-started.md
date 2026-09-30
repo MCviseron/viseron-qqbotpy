@@ -207,3 +207,11 @@ SDK 会自动管理 access_token：
         token = await manager.get_access_token()
         print(token)
         await manager.close()
+
+## 7. 下一步
+
+- 常见功能示例：docs/features.md
+- 事件监听与完整事件表：docs/events.md
+- 本地面板与群管理：docs/management.md
+- SDK 基础能力：docs/core.md
+- 完整 API 列表：docs/api-reference.md

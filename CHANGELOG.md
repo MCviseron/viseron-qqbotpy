@@ -7,19 +7,45 @@
 
 ## [Unreleased]
 
+- 暂无。
+
+## [0.3.0] - 2026-10-01
+
 ### Added
 
-- 新增 upload_group_media：封装群聊富媒体分片上传流程，调用后直接返回 files 接口结果。
-- 新增 upload_c2c_media：封装单聊富媒体分片上传流程，调用后直接返回 files 接口结果。
+- 新增 upload_group_media：封装群聊富媒体分片上传完整流程，依次完成预上传、分片 PUT、分片完成和文件合并，调用后直接返回 files 接口结果。
+- 新增 upload_c2c_media：封装单聊富媒体分片上传完整流程，调用后直接返回 files 接口结果。
+- 新增 Panel / PanelItem：面向对象的指令面板封装，支持创建、查询、增删指令与链接、保存、关联对象增删、刷新和删除。
+- 新增 PanelStore / load_panels：以本地 panels/panels.json 为配置源把面板同步到平台，并用 panels/store.json 记录 scope:key 与 panel_id 的映射。
+- 新增 GroupStore / load_group_store：本地群聊状态管理，把机器人加入过的群记录到 groups.json，并在启动时清理超期记录。
+- Client 新增 group_store_path 和 group_store_retention_days 参数，用于自动管理 groups.json。
+- Client 自动记录群事件：GROUP_ADD_ROBOT、GROUP_DEL_ROBOT、GROUP_AT_MESSAGE_CREATE、GROUP_MESSAGE_CREATE 会在回调触发前写入 groups.json。
+- Client 在群记录缺少群名称等资料时，自动调用 get_group_info 补全群信息。
+- 新增 docs/management.md，说明面板与群管理、本地配置同步。
+- 新增 tests/test_panel.py 和 tests/test_group_store.py。
 - post_group_file / post_c2c_file 的 url 参数改为可选，支持分片上传合并场景。
-- 新增 Panel / PanelItem / PanelStore / load_panels：高层指令面板管理，支持本地 panels.json 配置和启动同步。
-- 新增 GroupStore / load_group_store：本地群聊状态管理，支持启动自动初始化和群事件自动记录。
+- 对齐平台文档 2026-09-03 新增的群成员管理接口：get_group_members（获取群成员列表，每页最多 30 条）、get_group_member（获取群成员信息）、batch_remove_group_members（群成员批量移除，单次最多 20 个）、get_group_member_blacklist（群黑名单查询）、update_group_member_blacklist（群黑名单操作，op 取 add / del）。
+- types 新增 GroupMember、GroupMemberList、GroupBlacklistUser、GroupMemberBlacklist、GroupMuteRule、GroupMuteScheduleRule、GroupMuteRecurringRule、GroupMemberMuteState、GroupRestrictChatSetting 类型提示。
+- 新增 tests/test_group_api.py：离线校验群成员管理与分享链接接口的路径、方法、参数与请求体。
 
 ### Changed
 
-- upload_group_media 参数简化为只传 group_openid。
-- upload_c2c_media 参数简化为只传 user_openid。
-- Client 新增 group_store_path 和 group_store_retention_days 参数，用于自动管理 groups.json。
+- upload_group_media 参数简化为只传 group_openid，upload_c2c_media 参数简化为只传 user_openid。
+- get_panels 改为必传 scope，按场景查询指令面板列表。
+- load_panels 只加载本地状态，不再自动同步平台；需要创建或更新平台面板时必须显式调用 sync_from_config。
+- GroupStore.update_group_info 直接保存平台返回的完整群信息，不再额外生成重复的别名字段。
+- groups.json 的时间字段统一使用 UTC+8 时区。
+- docs/features.md 补充本地文件分片上传封装和面板高层用法，并修正指令面板示例的 target_type 与 items.type 取值，与 Panel 高层 API 保持一致。
+- 对齐平台文档 2026-09-16 的字段修正：create_url_link 的请求字段由 url_link 改为 callback_data（最长 32 字符），响应结构为 {"data": {"url": ...}}；url_link 保留为已废弃的兼容别名。
+- docs/features.md 新增 10.8-10.12 群成员管理与群黑名单用法，并重写第 13 节分享链接。
+- docs/api-reference.md 第 10 节补充群成员管理接口，第 11 节更新 create_url_link 签名。
+
+### Fixed
+
+- 修复 get_panels 不传 scope 时查询结果不符合预期的问题，现在缺少 scope 会直接报错。
+- 修复 groups.json 中群信息存在重复别名字段的问题。
+- 修复 create_url_link 发送了平台不存在的 url_link 字段的问题，现在按文档发送 callback_data。
+- 修复 pyproject.toml 版本号停留在 0.2.0、与 viseron_qqbotpy.__version__ 不一致的问题，两者统一为 0.3.0。
 
 ## [0.2.0] - 2026-08-30
 

@@ -12,6 +12,10 @@
 - WebSocket 网关：Identify / Resume / Heartbeat / 分片 / 断线重连
 - 覆盖频道、群聊、单聊、身份组、成员、消息、表情、日程、论坛、音频、公告、
   接口权限、富媒体上传、入群审批、指令面板、自定义菜单等 API
+- 本地文件分片上传一键封装：upload_group_media / upload_c2c_media
+- 本地群聊状态管理：GroupStore 自动把机器人加入过的群记录到 groups.json
+- 群成员管理：群成员列表/详情、批量移除、群黑名单查询与操作（平台 2026-09-03 新增，内邀能力）
+- 指令面板管理：Panel / PanelStore 用 panels/panels.json 配置并同步到平台
 - 事件模型为 dataclass，同时保留完整原始 payload（raw 字段）
 - 可选 Webhook Ed25519 签名验证
 
@@ -86,6 +90,33 @@
 - GROUP_MEMBER_ADD -> on_group_member_add
 - READY / RESUMED -> on_ready / on_resumed（无参数）
 
+## 本地面板与群聊状态
+
+SDK 可以把群聊状态和指令面板配置保存在本地：
+
+- groups.json：机器人加入过的群，由 Client 自动维护，无需手动调用。
+- panels/panels.json：你自己维护的面板配置；panels/store.json 由 SDK 记录 panel_id 映射。
+
+    from viseron_qqbotpy import Client, Intents, load_panels
+
+
+    class MyBot(Client):
+        async def on_ready(self):
+            # 把 panels/panels.json 同步到平台
+            store = await load_panels(self.api, root_dir="panels")
+            await store.sync_from_config()
+
+
+    if __name__ == "__main__":
+        bot = MyBot(
+            intents=Intents.default(),
+            group_store_path="data/groups.json",
+            group_store_retention_days=30,
+        )
+        bot.run(appid=APPID, secret=APPSECRET)
+
+详细说明见 docs/management.md。
+
 ## 直接调用 API
 
 在 Client 子类中，可以直接使用 self.api：
@@ -150,6 +181,8 @@
       types.py        # payload 类型提示
       flags.py        # Intents / Permission
       errors.py       # 异常体系
+      panel.py        # 指令面板：Panel / PanelStore
+      group_store.py  # 本地群聊状态：GroupStore
       webhook.py      # 可选 Webhook 签名
       ext/            # 命令、颜色、频道跳转等扩展
 

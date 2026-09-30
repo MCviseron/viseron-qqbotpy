@@ -21,11 +21,11 @@
 
 构建完成后，可以直接安装 dist 目录中的 wheel 文件：
 
-    pip install dist/viseron_qqbotpy-0.1.0-py3-none-any.whl
+    pip install dist/viseron_qqbotpy-0.3.0-py3-none-any.whl
 
 也可以安装源码包：
 
-    pip install dist/viseron_qqbotpy-0.1.0.tar.gz
+    pip install dist/viseron_qqbotpy-0.3.0.tar.gz
 
 ### 1.3 从 PyPI 安装
 
@@ -64,12 +64,12 @@ Windows PowerShell 使用：
 
 构建成功后，会在 dist 目录生成两个文件：
 
-- viseron_qqbotpy-0.1.0-py3-none-any.whl
-- viseron_qqbotpy-0.1.0.tar.gz
+- viseron_qqbotpy-0.3.0-py3-none-any.whl
+- viseron_qqbotpy-0.3.0.tar.gz
 
 示例输出末尾类似：
 
-    Successfully built viseron_qqbotpy-0.1.0.tar.gz and viseron_qqbotpy-0.1.0-py3-none-any.whl
+    Successfully built viseron_qqbotpy-0.3.0.tar.gz and viseron_qqbotpy-0.3.0-py3-none-any.whl
 
 ### 2.4 检查构建产物
 
@@ -79,8 +79,8 @@ Windows PowerShell 使用：
 
 通过时会显示：
 
-    Checking dist/viseron_qqbotpy-0.1.0-py3-none-any.whl: PASSED
-    Checking dist/viseron_qqbotpy-0.1.0.tar.gz: PASSED
+    Checking dist/viseron_qqbotpy-0.3.0-py3-none-any.whl: PASSED
+    Checking dist/viseron_qqbotpy-0.3.0.tar.gz: PASSED
 
 ## 3. 发布到 TestPyPI
 
@@ -145,15 +145,15 @@ Windows PowerShell：
 - viseron-botpy/pyproject.toml 中的 version
 - viseron-botpy/src/viseron_qqbotpy/__init__.py 中的 __version__
 
-例如从 0.1.0 升级到 0.2.0：
+例如从 0.2.0 升级到 0.3.0：
 
 pyproject.toml：
 
-    version = "0.2.0"
+    version = "0.3.0"
 
 __init__.py：
 
-    __version__ = "0.2.0"
+    __version__ = "0.3.0"
 
 ### 4.3 重新构建并检查
 
@@ -167,6 +167,18 @@ __init__.py：
 ### 4.5 发布后安装验证
 
     pip install viseron-qqbotpy
+
+### 4.6 归档版本（Git tag）
+
+发布完成后，把同一份代码提交并打上 Git tag，方便回溯每个发布版本：
+
+    git add -A
+    git commit -m "release: v0.3.0"
+    git tag -a v0.3.0 -m "v0.3.0"
+    git push origin main
+    git push origin v0.3.0
+
+tag 名与 pyproject.toml 中的 version 保持一致，例如 0.3.0 对应 v0.3.0。
 
 ## 5. 发布流程总结
 
@@ -194,6 +206,13 @@ __init__.py：
 
     # 7. 验证无误后上传正式源
     python -m twine upload dist/*
+
+    # 8. 提交并打 tag
+    git add -A
+    git commit -m "release: v0.3.0"
+    git tag -a v0.3.0 -m "v0.3.0"
+    git push origin main
+    git push origin v0.3.0
 
 ## 6. 常见问题
 
@@ -233,9 +252,9 @@ __init__.py：
 
 本文档编写时，已经成功构建并检查通过：
 
-- viseron-botpy/dist/viseron_qqbotpy-0.2.0-py3-none-any.whl
-- viseron-botpy/dist/viseron_qqbotpy-0.2.0.tar.gz
+- viseron-botpy/dist/viseron_qqbotpy-0.3.0-py3-none-any.whl
+- viseron-botpy/dist/viseron_qqbotpy-0.3.0.tar.gz
 
 可以直接用它们做本地安装测试：
 
-    pip install dist/viseron_qqbotpy-0.2.0-py3-none-any.whl
+    pip install dist/viseron_qqbotpy-0.3.0-py3-none-any.whl

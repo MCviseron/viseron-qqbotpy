@@ -20,6 +20,26 @@ ext 扩展工具单独记录在 docs/ext.md。
 - 使用 run 或 start 启动机器人。
 - 内部提供 client.api、client.robot。
 
+### Client 构造参数
+
+    bot = MyBot(
+        intents=Intents.default(),
+        timeout=5,
+        is_sandbox=False,
+        group_store_path="data/groups.json",
+        group_store_retention_days=30,
+    )
+
+参数说明：
+
+- intents：事件订阅位掩码，必填，必须是 Intents 实例。
+- timeout：HTTP 请求超时秒数，默认 5。
+- is_sandbox：是否使用沙盒环境，默认 False。
+- group_store_path：本地群聊状态文件路径，默认 ./groups.json。
+- group_store_retention_days：机器人退群后群记录保留天数，超期自动删除，默认 30。
+
+启动后 SDK 会创建 client.group_store，并根据群事件自动维护 groups.json，详见 docs/management.md。
+
 阻塞运行：
 
     class MyBot(Client):
@@ -345,7 +365,79 @@ SDK 提供 configure_logging：
 
 这些模型都保留 raw 字段，可以访问平台下发的完整原始数据。
 
-## 7. 异常
+## 7. 本地面板与群聊状态
+
+SDK 可以在本地保存群聊状态和指令面板配置。完整用法见 docs/management.md，这里只列出可导入的对象和常用方法。
+
+### GroupStore
+
+本地群聊状态存储，默认写入 groups.json。
+
+导入：
+
+    from viseron_qqbotpy import GroupStore, load_group_store
+
+    store = load_group_store("groups.json", inactive_retention_days=30)
+
+常用方法：
+
+- load：读取文件，文件不存在时创建，并清理超期记录。
+- save：把当前数据写回文件。
+- get / groups：读取单个群记录或全部群记录。
+- all_active_group_openids：返回仍在群内的群 OpenID 列表。
+- add_group：新增或重新激活群记录。
+- ensure_group：确保群记录存在，并刷新 last_seen。
+- update_group_info：写入平台返回的完整群信息。
+- remove_group：把群标记为 active=false，并记录 removed_at。
+- cleanup_stale_inactive_groups：删除超过保留期的退群记录。
+
+Client 启动时会自动创建该对象，并在群事件到达时自动更新，通常不需要手动调用。
+
+### Panel / PanelItem
+
+单个指令面板对象，封装 /v2/panels 的创建、查询、修改和删除。
+
+导入：
+
+    from viseron_qqbotpy import Panel, PanelItem
+
+    panel = await Panel.create(
+        self.api,
+        scope="group",
+        target_type="all",
+        remark="群聊默认面板",
+    )
+    panel.add_command("签到", desc="每日签到")
+    panel.add_link("官网", desc="打开官网", url="https://example.com")
+    await panel.save()
+
+常用方法：
+
+- Panel.create：创建面板。
+- Panel.get：按 panel_id 查询面板。
+- add_command / add_link：追加面板项。
+- save / refresh / delete：保存、刷新、删除面板。
+- add_targets / remove_targets：增删面板关联的用户或群。
+
+### PanelStore / load_panels
+
+以本地 panels/panels.json 为配置源，把面板同步到平台，并用 panels/store.json 记录 scope:key 与 panel_id 的映射。
+
+导入：
+
+    from viseron_qqbotpy import PanelStore, load_panels
+
+    store = await load_panels(self.api, root_dir="panels")
+
+    # load_panels 只加载本地状态，需要同步平台时必须显式调用
+    await store.sync_from_config()
+
+常用方法：
+
+- load / save_store：读取和保存本地状态。
+- sync_from_config：按配置创建或更新面板，并在 target_type 为 specific 时同步关联对象。
+
+## 8. 异常
 
 从主包导入：
 
@@ -381,7 +473,7 @@ APIError 常用属性：
     except APIError as exc:
         print(exc.status, exc.code, exc.trace_id, exc)
 
-## 8. 类型辅助
+## 9. 类型辅助
 
 TypedDict 类型提示，定义在 viseron_qqbotpy.types。
 
@@ -394,7 +486,15 @@ TypedDict 类型提示，定义在 viseron_qqbotpy.types。
 - 为消息和事件 payload 提供编辑器提示。
 - 不是运行时必需，所有 API 也接受普通 dict。
 
-## 9. Webhook 签名验证
+群相关类型（对齐平台文档 2026-09-03 与 2026-08-10）：
+
+- GroupMember / GroupMemberList：群成员列表接口的成员与分页结构。
+- GroupBlacklistUser / GroupMemberBlacklist：群黑名单查询接口的用户与分页结构。
+- GroupRestrictChatSetting：查询群禁言状态接口的完整响应。
+- GroupMuteRule / GroupMuteScheduleRule / GroupMuteRecurringRule：群级全员禁言规则（none / always / schedule）。
+- GroupMemberMuteState：处于禁言中的单个群成员。
+
+## 10. Webhook 签名验证
 
 Webhook 签名功能在主包 viseron_qqbotpy.webhook，但依赖 cryptography，需要安装可选依赖。
 
@@ -413,7 +513,7 @@ Webhook 签名功能在主包 viseron_qqbotpy.webhook，但依赖 cryptography�
 
 详细说明见 docs/webhook.md。
 
-## 10. 基础能力与 ext 的边界
+## 11. 基础能力与 ext 的边界
 
 主包基础能力：
 
@@ -422,6 +522,8 @@ Webhook 签名功能在主包 viseron_qqbotpy.webhook，但依赖 cryptography�
 - TokenManager / AccessToken
 - HTTPClient / Route
 - Intents / Permission
+- GroupStore / load_group_store：本地群聊状态
+- Panel / PanelItem / PanelStore / load_panels：指令面板管理
 - load_env：加载 .env 文件
 - get_logger
 - 事件模型

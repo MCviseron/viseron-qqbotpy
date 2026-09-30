@@ -118,6 +118,14 @@
 - execute_group_join_approval_strategy(strategy_id)：执行入群自动审批策略
 - update_group_join_approval_strategy_whitelist(strategy_id, **fields)：修改策略白名单
 
+群成员管理（平台文档 2026-09-03 新增，当前为内邀白名单能力）：
+
+- get_group_members(group_openid, cursor=None)：获取群成员列表，每页最多 30 条
+- get_group_member(group_openid, member_openid)：获取群成员信息
+- batch_remove_group_members(group_openid, member_openids, add_to_member_blacklist=False)：群成员批量移除，单次最多 20 个
+- get_group_member_blacklist(group_openid, cursor=None, limit=20)：群黑名单查询
+- update_group_member_blacklist(group_openid, op, member_openids)：群黑名单操作，op 取 add / del
+
 ## 11. 菜单、面板与分享
 
 - get_menu()：查询全局自定义菜单
@@ -128,7 +136,7 @@
 - update_panel(panel_id, panel)：修改指令面板
 - update_panel_target(panel_id, **fields)：修改指令面板关联对象
 - delete_panel(panel_id)：删除指令面板
-- create_url_link(url_link)：生成分享链接
+- create_url_link(callback_data=None, *, url_link=None)：生成分享链接，请求字段为 callback_data（不超过 32 字符），响应为 {"data": {"url": ...}}；url_link 为已废弃的兼容别名
 
 ## 12. 互动响应
 

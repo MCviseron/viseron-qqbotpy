@@ -67,6 +67,8 @@ SDK 通过 WebSocket 接收事件。事件类型会转换为小写，并在前�
 | C2C_MSG_RECEIVE | 用户开启单聊主动消息 | on_c2c_msg_receive | C2CManageEvent |
 | SUBSCRIBE_MESSAGE_STATUS | 订阅消息授权状态发生变更 | on_subscribe_message_status | SubscribeMessageStatusEvent |
 
+说明：GROUP_ADD_ROBOT、GROUP_DEL_ROBOT、GROUP_AT_MESSAGE_CREATE 和 GROUP_MESSAGE_CREATE 到达时，SDK 会先把群记录写入本地 groups.json，再调用对应的 on_ 回调；群资料缺失时会自动调用 get_group_info 补全。详见 docs/management.md。
+
 互动与审核：
 
 | 事件类型 | 事件说明 | 回调方法 | 回调参数模型 |
