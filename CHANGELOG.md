@@ -7,7 +7,11 @@
 
 ## [Unreleased]
 
-- 暂无。
+### Added
+
+- 新增 docs/automation.md：QQ 文档同步自动化任务定义、任务卡字段、版本规则和验收标准。
+- docs/publish.md 增加完整手动发布流程，覆盖 ChatClone-BotPy 环境、测试、构建、twine 检查、TestPyPI、PyPI、发布后验证和 tag 推送。
+- README 与 docs/README.md 增加自动化任务文档入口。
 
 ## [0.3.0] - 2026-10-01
 

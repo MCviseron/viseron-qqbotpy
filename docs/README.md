@@ -7,6 +7,7 @@
 - API 参考：docs/api-reference.md
 - 扩展工具：docs/ext.md
 - 面板与群管理：docs/management.md
+- 自动化任务：docs/automation.md
 - Webhook 签名验证：docs/webhook.md
 - 构建、发布与安装：docs/publish.md
 

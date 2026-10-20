@@ -258,3 +258,96 @@ tag 名与 pyproject.toml 中的 version 保持一致，例如 0.3.0 对应 v0.3
 可以直接用它们做本地安装测试：
 
     pip install dist/viseron_qqbotpy-0.3.0-py3-none-any.whl
+
+## 8. 完整手动发布流程（ChatClone-BotPy）
+
+以下步骤必须按顺序执行，每一步成功后再进入下一步。
+
+### 8.1 发布前检查
+
+    cd D:\Program\QQ-Bot-Class\qqbotpy-source-code\viseron-botpy
+
+确认：
+
+- pyproject.toml 的 version 与 src/viseron_qqbotpy/__init__.py 的 __version__ 一致。
+- CHANGELOG.md 有对应版本段落。
+- git status 干净。
+- 版本规则：major 为不兼容/大量新接口；minor 为新增接口或字段；patch 为 bug/文档修正。
+
+### 8.2 使用 ChatClone-BotPy 环境
+
+    $py = 'C:\Users\25639\.conda\envs\ChatClone-BotPy\python.exe'
+
+如果 conda 在 PATH 中，也可以使用 conda run -n ChatClone-BotPy。
+
+### 8.3 测试
+
+    & $py -m pytest -q
+
+要求全部通过，日志保存到 reports/logs/YYYY-MM-DD-pytest.log。
+
+### 8.4 清理并构建
+
+    Remove-Item -Recurse -Force dist, build, src\viseron_qqbotpy.egg-info -ErrorAction SilentlyContinue
+    & $py -m build
+    & $py -m twine check dist/*
+
+要求两个产物都 PASSED。保存 build 和 twine 日志。
+
+### 8.5 干净环境试装 wheel
+
+    conda create -n verify-qqbotpy python=3.11 -y
+    conda run -n verify-qqbotpy python -m pip install dist/viseron_qqbotpy-X.Y.Z-py3-none-any.whl
+    conda run -n verify-qqbotpy python -c "import viseron_qqbotpy; print(viseron_qqbotpy.__version__)"
+
+### 8.6 TestPyPI
+
+    $env:TWINE_USERNAME = "__token__"
+    $env:TWINE_PASSWORD = "pypi-测试token"
+    & $py -m twine upload --repository testpypi dist/*
+
+测试安装：
+
+    conda run -n verify-qqbotpy python -m pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ viseron-qqbotpy==X.Y.Z
+
+### 8.7 正式 PyPI
+
+    $env:TWINE_USERNAME = "__token__"
+    $env:TWINE_PASSWORD = "pypi-正式token"
+    & $py -m twine upload dist/*
+
+发布后验证：
+
+    pip install --upgrade viseron-qqbotpy
+    python -c "import viseron_qqbotpy; print(viseron_qqbotpy.__version__)"
+
+### 8.8 Git 提交与 tag
+
+    git add .
+    git commit -m "chore: release vX.Y.Z"
+    git tag -a vX.Y.Z -m "viseron-qqbotpy vX.Y.Z"
+    git push origin main --tags
+    git ls-remote --tags origin
+
+### 8.9 检查清单
+
+- [ ] 两处版本号一致
+- [ ] CHANGELOG 已更新
+- [ ] pytest 全部通过
+- [ ] build 成功
+- [ ] twine check 两个产物 PASSED
+- [ ] 干净环境 wheel 安装成功
+- [ ] TestPyPI 安装成功
+- [ ] PyPI 上传成功
+- [ ] pip install viseron-qqbotpy 成功
+- [ ] tag 已推送
+- [ ] GitHub Release 已创建（可选）
+
+### 8.10 常见失败
+
+- 403：Token 错误、平台不匹配或包名被占用。
+- File already exists：同版本不能重复上传，必须升版本。
+- twine check 失败：检查 README 编码和 pyproject 元数据。
+- ModuleNotFoundError：确认使用 ChatClone-BotPy 环境。
+- 构建后 import 旧版本：清理 build、egg-info、__pycache__ 后重装。
+
