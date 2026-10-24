@@ -13,6 +13,25 @@
 - docs/publish.md 增加完整手动发布流程，覆盖 ChatClone-BotPy 环境、测试、构建、twine 检查、TestPyPI、PyPI、发布后验证和 tag 推送。
 - README 与 docs/README.md 增加自动化任务文档入口。
 
+## [0.4.0] - 2026-10-24
+
+### Added
+
+- 对齐平台文档 2026-10-21 新增的素材管理接口：prepare_media_image（申请上传，返回 upload_id / presigned_url / expires_in）、complete_media_image（完成上传，返回 image_id / url / ttl / preview_url）、get_media_images（分页查询有效图片）、delete_media_image（删除图片并释放配额）。
+- 新增 put_presigned_image：向预签名地址直传图片二进制并返回 ETag，Content-Type 与 prepare 声明保持一致。
+- 新增 upload_markdown_image：一步完成 prepare → PUT → complete，直接返回 complete 结果（含 qqbot-media:// 引用）。
+- 新增 guess_image_content_type：按扩展名推断 png / jpeg / gif / webp 的 MIME 类型，未知扩展名抛 ValueError。
+- types 新增 MediaImagePrepare、MediaImageComplete、MediaImage、MediaImageList 类型提示。
+- 新增 tests/test_media_api.py：14 个离线测试，覆盖四个接口的路径与请求体、MIME 推断、以及 upload_markdown_image 的三步流程（PUT 用桩替换，不联网）。
+
+### Changed
+
+- docs/api-reference.md 新增第 13 节「素材管理（Markdown 图片）」，原错误类型章节顺延为第 14 节。
+- docs/features.md 新增第 15 节素材管理，含一键上传、Markdown 引用、分步调用、查询与删除。
+- docs/core.md 的类型辅助章节补充 4 个素材管理 TypedDict。
+- README 特性列表补充 Markdown 素材管理一行。
+- 版本号统一提升到 0.4.0（pyproject.toml 与 __init__.py）。
+
 ## [0.3.0] - 2026-10-01
 
 ### Added

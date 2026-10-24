@@ -142,7 +142,21 @@
 
 - on_interaction_result(interaction_id, code)：响应互动事件
 
-## 13. 错误类型
+## 13. 素材管理（Markdown 图片）
+
+平台文档 2026-10-21 新增。图片上传到平台后得到 qqbot-media:// 引用，写进 Markdown 消息即可，不依赖公网图床。
+
+- prepare_media_image(file_name, file_size, content_type, md5, sha1)：申请上传任务，返回 upload_id / presigned_url / expires_in
+- put_presigned_image(presigned_url, file_path, content_type)：向预签名地址直传图片二进制，返回 ETag
+- complete_media_image(upload_id, md5)：完成上传，返回 image_id / url / ttl / preview_url
+- get_media_images(cursor=None)：分页查询机器人当前有效图片
+- delete_media_image(image_id)：删除图片并释放配额
+- upload_markdown_image(file_path, content_type=None)：三步流程封装，直接返回 complete 的结果
+- guess_image_content_type(file_path)：按扩展名推断 MIME（png / jpeg / gif / webp）
+
+限制：单张 10MB、单机器人 100 张、上传任务 4 小时有效、图片 90 天未被引用则失效。
+
+## 14. 错误类型
 
 所有 HTTP 错误都会抛出 APIError 或其子类：
 

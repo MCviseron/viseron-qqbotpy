@@ -35,6 +35,10 @@ __all__ = [
     "Keyboard",
     "KeyboardContent",
     "MediaInfo",
+    "MediaImage",
+    "MediaImageComplete",
+    "MediaImageList",
+    "MediaImagePrepare",
     "MessageArk",
     "MessageEmbed",
     "MessageMarkdown",
@@ -122,6 +126,40 @@ class FileInfo(TypedDict, total=False):
 
 class MediaInfo(TypedDict, total=False):
     file_info: str
+
+
+class MediaImagePrepare(TypedDict, total=False):
+    """Response of POST /v2/media-images/prepare."""
+
+    upload_id: str  # valid for 4 hours
+    presigned_url: str  # PUT the image binary here
+    expires_in: int  # presigned url lifetime in seconds
+
+
+class MediaImage(TypedDict, total=False):
+    """One entry of GET /v2/media-images."""
+
+    image_id: str
+    url: str  # qqbot-media://image/v1/<token>
+    file_name: str
+    preview_url: str  # short-lived COS link, do not persist
+    created_at: int  # unix seconds
+    expires_at: int  # unix seconds, extended whenever a message references it
+
+
+class MediaImageList(TypedDict, total=False):
+    images: List[MediaImage]
+    next_cursor: str  # empty string means the last page
+    total: int  # valid images of the bot, same counter as the 100-image quota
+
+
+class MediaImageComplete(TypedDict, total=False):
+    """Response of POST /v2/media-images/complete."""
+
+    image_id: str
+    url: str  # qqbot-media://image/v1/<token>
+    ttl: int  # sliding window in seconds (90 days)
+    preview_url: str
 
 
 class InputNotify(TypedDict, total=False):

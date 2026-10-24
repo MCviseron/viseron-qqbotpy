@@ -15,6 +15,7 @@
 - 本地文件分片上传一键封装：upload_group_media / upload_c2c_media
 - 本地群聊状态管理：GroupStore 自动把机器人加入过的群记录到 groups.json
 - 群成员管理：群成员列表/详情、批量移除、群黑名单查询与操作（平台 2026-09-03 新增，内邀能力）
+- Markdown 素材管理：图片上传到平台并获取 qqbot-media:// 引用，一条 upload_markdown_image 搞定（平台 2026-10-21 新增）
 - 指令面板管理：Panel / PanelStore 用 panels/panels.json 配置并同步到平台
 - 事件模型为 dataclass，同时保留完整原始 payload（raw 字段）
 - 可选 Webhook Ed25519 签名验证

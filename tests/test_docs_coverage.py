@@ -17,11 +17,18 @@ DOCS = Path(__file__).resolve().parents[1] / "docs" / "api-reference.md"
 
 
 def _public_api_names() -> set:
+    """Public callables on BotAPI.
+
+    inspect.isroutine covers plain methods, staticmethods (functions) and
+    classmethods (bound methods), so a documented classmethod such as
+    guess_image_content_type is recognised as a real API.
+    """
     names = set()
-    for name, member in inspect.getmembers(BotAPI, predicate=inspect.isfunction):
+    for name in dir(BotAPI):
         if name.startswith("_"):
             continue
-        names.add(name)
+        if inspect.isroutine(getattr(BotAPI, name)):
+            names.add(name)
     return names
 
 

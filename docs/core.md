@@ -494,6 +494,12 @@ TypedDict 类型提示，定义在 viseron_qqbotpy.types。
 - GroupMuteRule / GroupMuteScheduleRule / GroupMuteRecurringRule：群级全员禁言规则（none / always / schedule）。
 - GroupMemberMuteState：处于禁言中的单个群成员。
 
+素材管理类型（对齐平台文档 2026-10-21）：
+
+- MediaImagePrepare：申请上传的响应（upload_id / presigned_url / expires_in）。
+- MediaImageComplete：完成上传的响应（image_id / url / ttl / preview_url）。
+- MediaImage / MediaImageList：查询有效图片的列表项与分页结构。
+
 ## 10. Webhook 签名验证
 
 Webhook 签名功能在主包 viseron_qqbotpy.webhook，但依赖 cryptography，需要安装可选依赖。

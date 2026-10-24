@@ -1001,6 +1001,137 @@ class BotAPI:
         return await self._post("/v2/generate_url_link", json={"callback_data": data})
 
     # ------------------------------------------------------------------ #
+    # markdown media assets (platform docs 2026-10-21)
+    # ------------------------------------------------------------------ #
+    _IMAGE_CONTENT_TYPES = {
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".gif": "image/gif",
+        ".webp": "image/webp",
+    }
+
+    @classmethod
+    def guess_image_content_type(cls, file_path: str) -> str:
+        """Map a local image path to the MIME type the platform accepts.
+
+        Only png / jpeg / gif / webp are supported; the platform rejects a
+        file whose extension and content_type disagree.
+        """
+        suffix = os.path.splitext(file_path)[1].lower()
+        content_type = cls._IMAGE_CONTENT_TYPES.get(suffix)
+        if content_type is None:
+            raise ValueError(
+                f"unsupported image type {suffix!r}; expected one of "
+                f"{sorted(cls._IMAGE_CONTENT_TYPES)}"
+            )
+        return content_type
+
+    async def prepare_media_image(
+        self,
+        file_name: str,
+        file_size: int,
+        content_type: str,
+        md5: str,
+        sha1: str,
+    ) -> Any:
+        """Create an upload task and return the presigned PUT url.
+
+        The upload task is valid for 4 hours; the presigned url expires after
+        the returned expires_in seconds.
+        """
+        payload = {
+            "file_name": file_name,
+            "file_size": int(file_size),
+            "content_type": content_type,
+            "md5": md5,
+            "sha1": sha1,
+        }
+        return await self._post("/v2/media-images/prepare", json=payload)
+
+    async def complete_media_image(self, upload_id: str, md5: str) -> Any:
+        """Finish an upload task and return image_id / url / ttl.
+
+        md5 must match the ETag returned by the presigned PUT (the file MD5),
+        otherwise the platform answers 40035003.
+        """
+        return await self._post(
+            "/v2/media-images/complete",
+            json={"upload_id": upload_id, "md5": md5},
+        )
+
+    async def get_media_images(self, cursor: Optional[str] = None) -> Any:
+        """List the bot's valid images, newest first."""
+        return await self._get("/v2/media-images", params={"cursor": cursor})
+
+    async def delete_media_image(self, image_id: str) -> Any:
+        """Delete an image and free one slot of the 100-image quota."""
+        return await self._delete(
+            "/v2/media-images/{image_id}/delete",
+            image_id=image_id,
+        )
+
+    async def put_presigned_image(
+        self,
+        presigned_url: str,
+        file_path: str,
+        content_type: str,
+    ) -> Optional[str]:
+        """PUT the image binary to the presigned url and return its ETag.
+
+        The Content-Type header must match the one declared in prepare,
+        otherwise the storage backend rejects the PUT with 403.
+        """
+        with open(file_path, "rb") as handle:
+            data = handle.read()
+        async with aiohttp.ClientSession() as session:
+            async with session.put(
+                presigned_url,
+                data=data,
+                headers={"Content-Type": content_type},
+            ) as response:
+                response.raise_for_status()
+                etag = response.headers.get("ETag")
+        return etag.strip('"') if etag else None
+
+    async def upload_markdown_image(
+        self,
+        file_path: str,
+        content_type: Optional[str] = None,
+    ) -> Any:
+        """Upload a local image and return the completed upload response.
+
+        The returned ``url`` is a ``qqbot-media://image/v1/<token>`` reference
+        that can be embedded in Markdown::
+
+            ![说明 #800px #400px](qqbot-media://image/v1/<token>)
+
+        Images are limited to 10 MB and 100 per bot, and expire after 90 days
+        without being referenced.
+        """
+        content_type = content_type or self.guess_image_content_type(file_path)
+        file_size, md5, sha1, _ = self._compute_file_digests(file_path)
+
+        prepare = await self.prepare_media_image(
+            file_name=os.path.basename(file_path),
+            file_size=file_size,
+            content_type=content_type,
+            md5=md5,
+            sha1=sha1,
+        )
+
+        etag = await self.put_presigned_image(
+            prepare["presigned_url"],
+            file_path,
+            content_type,
+        )
+
+        return await self.complete_media_image(
+            upload_id=prepare["upload_id"],
+            md5=etag or md5,
+        )
+
+    # ------------------------------------------------------------------ #
     # high-level chunked media upload
     # ------------------------------------------------------------------ #
     @staticmethod

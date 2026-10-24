@@ -1971,3 +1971,109 @@ SDK 提供了两个高层封装方法，把预上传、分片 PUT、分片完成
                 interaction_id=interaction.id,
                 code=0,
             )
+
+## 15. 素材管理（Markdown 图片）
+
+功能说明：把 Markdown 消息要用的图片预先上传到平台，拿到 `qqbot-media://` 引用后写进 Markdown，不再依赖公网图床。平台文档 2026-10-21 新增。图片在有效期内可反复引用，发送时由平台自动转存。
+
+参数来源：
+
+- file_path：本地图片路径，扩展名必须是 png / jpg / jpeg / gif / webp。
+- content_type：可选，不传时按扩展名推断（`guess_image_content_type`）。
+- 单张图片不超过 10MB；单机器人最多 100 张；`prepare` 返回的 upload_id 4 小时内有效；图片 90 天未被引用则失效。
+
+### 15.1 一键上传（推荐）
+
+示例：
+
+    result = await self.api.upload_markdown_image("charts/kline.png")
+    print(result["image_id"])   # 102083127_3f9a1c4b7d2e8065
+    print(result["url"])        # qqbot-media://image/v1/<token>
+
+返回内容：`complete` 接口的响应，包含 image_id、url、ttl（秒）、preview_url（临时预览链接，勿持久化）。
+
+注意事项：
+
+- 内部依次执行 prepare → PUT 预签名地址 → complete，PUT 时会带上与 prepare 一致的 Content-Type。
+- complete 的 md5 优先取 PUT 响应的 ETag，取不到时用本地计算的 MD5。
+
+### 15.2 在 Markdown 中引用
+
+功能说明：把上一步拿到的 `url` 写进 Markdown 图片语法，宽高可选。
+
+示例：
+
+    result = await self.api.upload_markdown_image("charts/kline.png")
+    content = f"![分时K线 #800px #400px]({result['url']})"
+
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=2,
+        markdown={"content": content},
+    )
+
+返回内容：发送结果（消息 ID 等）。
+
+注意事项：
+
+- 引用链接与机器人绑定，篡改或被其它机器人引用会返回 40035010。
+- `qqbot-media://` 引用和普通公网图片 URL 可以在同一条 Markdown 里混用。
+
+### 15.3 分步调用
+
+功能说明：需要自定义上传过程（例如自己直传、自己控制 ETag）时，逐步调用三个接口。
+
+示例：
+
+    import hashlib
+
+    path = "charts/kline.png"
+    data = open(path, "rb").read()
+    content_type = self.api.guess_image_content_type(path)
+
+    prepare = await self.api.prepare_media_image(
+        file_name="kline.png",
+        file_size=len(data),
+        content_type=content_type,
+        md5=hashlib.md5(data).hexdigest(),
+        sha1=hashlib.sha1(data).hexdigest(),
+    )
+
+    etag = await self.api.put_presigned_image(
+        prepare["presigned_url"], path, content_type
+    )
+
+    result = await self.api.complete_media_image(
+        upload_id=prepare["upload_id"],
+        md5=etag or hashlib.md5(data).hexdigest(),
+    )
+
+返回内容：prepare 返回 upload_id / presigned_url / expires_in；complete 返回 image_id / url / ttl / preview_url。
+
+### 15.4 查询与删除
+
+功能说明：查看当前机器人的有效图片、删除不再使用的图片以释放 100 张的配额。
+
+参数来源：
+
+- cursor：分页游标，首页不传，翻页用上一页的 next_cursor。
+
+示例：
+
+    page = await self.api.get_media_images()
+    for image in page["images"]:
+        print(image["image_id"], image["file_name"], image["expires_at"])
+    print("总数", page["total"])
+
+    if page["next_cursor"]:
+        page = await self.api.get_media_images(cursor=page["next_cursor"])
+
+    # 删除后引用链接立即失效，已发送的消息不受影响
+    await self.api.delete_media_image("102083127_3f9a1c4b7d2e8065")
+
+返回内容：查询返回 images 列表（image_id / url / file_name / preview_url / created_at / expires_at）、next_cursor、total；删除返回空 JSON。
+
+注意事项：
+
+- 删除不存在的 image_id 返回 40035008。
+- 常见错误码：40035001 格式不支持、40035002 超过 10MB、40035003 上传任务无效或 ETag 不符、40035007 超过 100 张上限、40035009 图片已过期、40035010 引用链接无效。
