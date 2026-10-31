@@ -86,7 +86,7 @@
 
 ## 8. 群聊消息与富媒体
 
-- post_group_message(group_openid, msg_type, content, markdown, keyboard, msg_id, event_id, msg_seq, media, message_reference, is_wakeup, **fields)：发送群聊消息
+- post_group_message(group_openid, msg_type, content, markdown, keyboard, msg_id, event_id, msg_seq, media, message_reference, is_wakeup, card, **fields)：发送群聊消息；msg_type 取值 0 文本 / 2 Markdown / 7 富媒体 / 8 图文卡片（内容放 card）；content 或 markdown 中含 AT_EVERYONE 即 @全部成员
 - recall_group_message(group_openid, message_id)：撤回群聊消息
 - post_group_file(group_openid, file_type, url, srv_send_msg, file_name, upload_id)：群聊富媒体上传
 - post_group_upload_prepare(group_id, file_type, file_size, file_name, md5, sha1, md5_10m)：群聊富媒体预上传
@@ -95,7 +95,7 @@
 
 ## 9. 单聊消息与富媒体
 
-- post_c2c_message(openid, msg_type, content, markdown, keyboard, msg_id, event_id, msg_seq, media, message_reference, is_wakeup, **fields)：发送单聊消息
+- post_c2c_message(openid, msg_type, content, markdown, keyboard, msg_id, event_id, msg_seq, media, message_reference, is_wakeup, card, **fields)：发送单聊消息；msg_type 取值 0 文本 / 2 Markdown / 6 输入中状态 / 7 富媒体 / 8 图文卡片（内容放 card）
 - recall_c2c_message(openid, message_id)：撤回单聊消息
 - post_c2c_stream_message(openid, **fields)：流式发送单聊消息
 - post_c2c_file(openid, file_type, url, srv_send_msg, file_name, upload_id)：单聊富媒体上传

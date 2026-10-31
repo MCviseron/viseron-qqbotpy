@@ -13,6 +13,23 @@
 - docs/publish.md 增加完整手动发布流程，覆盖 ChatClone-BotPy 环境、测试、构建、twine 检查、TestPyPI、PyPI、发布后验证和 tag 推送。
 - README 与 docs/README.md 增加自动化任务文档入口。
 
+## [0.4.1] - 2026-10-31
+
+### Added
+
+- 对齐平台文档 2026-10-28 新增的图文卡片消息：post_group_message / post_c2c_message 新增 card 参数，配合 msg_type=8 使用；卡片结构为 {"type": "tuwen", "content": {title, description, url, pic_url}}。
+- 对齐平台文档 2026-10-26 新增的群聊 @全部成员：新增常量 AT_EVERYONE（值 `<qqbot-at-everyone />`），放进文本消息的 content 或 Markdown 消息的 markdown.content 即可 @全部成员。
+- types 新增 MessageCard、MessageCardContent 类型提示，并从主包导出 AT_EVERYONE。
+- 新增 tests/test_message_card.py：6 个离线测试，覆盖群聊/单聊卡片请求体、card 缺省时不发送、AT_EVERYONE 常量值，以及文本与 Markdown 中的 @全部成员透传。
+
+### Changed
+
+- docs/api-reference.md 第 8、9 节补充 msg_type 取值（新增 8=图文卡片）与 card 参数。
+- docs/features.md 新增 3.8 发送图文卡片、3.9 @全部成员。
+- docs/core.md 类型辅助章节补充 MessageCard / MessageCardContent / AT_EVERYONE。
+- README 特性列表补充图文卡片与 @全部成员一行。
+- 版本号提升到 0.4.1（pyproject.toml 与 __init__.py）。
+
 ## [0.4.0] - 2026-10-24
 
 ### Added

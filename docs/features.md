@@ -482,6 +482,93 @@
         message_id="消息 ID",
     )
 
+### 3.8 发送图文卡片
+
+功能说明：发送「图文卡片」消息。卡片由标题、描述、跳转链接和封面图组成，群聊和单聊都支持。平台文档 2026-10-28 新增，msg_type=8，内容放在 card 字段。
+
+参数来源：
+
+- msg_type：固定 8。
+- card：卡片对象。
+  - type：卡片类型，目前只有 tuwen（图文卡片）。
+  - content.title：标题，1-50 字符。
+  - content.description：描述，1-200 字符。
+  - content.url：点击卡片跳转的链接，必须是 https，≤1024 字符。
+  - content.pic_url：封面图链接，必须是 https，≤1024 字符。
+
+示例：
+
+    card = {
+        "type": "tuwen",
+        "content": {
+            "title": "iPhone 17 Pro 正式发布",
+            "description": "全新 A20 芯片 / 钛金属机身 / 支持卫星通信",
+            "url": "https://news.qq.com/rain/a/20261014A05XYZ00",
+            "pic_url": "https://inews.gtimg.com/newsapp_bt/0/xxx/1000.jpg",
+        },
+    }
+
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=8,
+        card=card,
+        msg_id="被动回复的消息 ID",
+        msg_seq=2,
+    )
+
+    # 单聊同理
+    await self.api.post_c2c_message(
+        openid="用户 OpenID",
+        msg_type=8,
+        card=card,
+    )
+
+返回内容：消息发送结果（消息 ID 等）。
+
+注意事项：
+
+- 两个链接都必须是 https，否则平台拒绝。
+- 卡片消息同样受被动回复窗口限制：传 msg_id 才是被动回复，否则按主动消息计费/限频。
+- 字段和响应结构可参考类型提示 `MessageCard` / `MessageCardContent`。
+
+### 3.9 @全部成员
+
+功能说明：在群聊的文本消息或 Markdown 消息里 @ 全部成员。平台文档 2026-10-26 新增，群聊专用。
+
+参数来源：
+
+- AT_EVERYONE：SDK 提供的常量，值就是平台要求的 `<qqbot-at-everyone />`。
+- 机器人必须是该群的管理员。
+- 同一个群每天只能发 1 次。
+
+示例：
+
+    from viseron_qqbotpy import AT_EVERYONE
+
+    # 文本消息
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=0,
+        content=f"{AT_EVERYONE} 今晚 20:00 群维护",
+        msg_id="被动回复的消息 ID",
+    )
+
+    # Markdown 消息
+    await self.api.post_group_message(
+        group_openid="群 OpenID",
+        msg_type=2,
+        markdown={"content": f"## 通知\n{AT_EVERYONE} 今晚 20:00 群维护"},
+        msg_id="被动回复的消息 ID",
+    )
+
+返回内容：消息发送结果。
+
+注意事项：
+
+- 这个标记只在群聊生效，单聊传进去会被当成普通文字。
+- 每个群每天 1 次的限制是平台侧的，超了会被拒绝；建议自己在业务里做去重。
+- 机器人不是群管理员时发送会失败。
+
 ## 4. 表情表态
 
 表情表态是对频道消息添加或删除表情回应。

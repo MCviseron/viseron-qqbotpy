@@ -40,6 +40,8 @@ __all__ = [
     "MediaImageList",
     "MediaImagePrepare",
     "MessageArk",
+    "MessageCard",
+    "MessageCardContent",
     "MessageEmbed",
     "MessageMarkdown",
     "MessagePayload",
@@ -204,6 +206,25 @@ class MessageEmbed(TypedDict, total=False):
     prompt: str
     thumbnail: Dict[str, Any]
     fields: List[EmbedField]
+
+
+class MessageCardContent(TypedDict, total=False):
+    """Body of a tuwen (image + text) card."""
+
+    title: str  # 1-50 characters
+    description: str  # 1-200 characters
+    url: str  # https, at most 1024 characters
+    pic_url: str  # https, at most 1024 characters
+
+
+class MessageCard(TypedDict, total=False):
+    """Card payload carried in ``card`` when msg_type=8.
+
+    The platform currently defines one type: "tuwen" (图文卡片).
+    """
+
+    type: str  # "tuwen"
+    content: MessageCardContent
 
 
 class MessagePayload(TypedDict, total=False):

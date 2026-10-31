@@ -19,9 +19,14 @@ from aiohttp import FormData
 from .http import HTTPClient, Route
 from .logging import get_logger
 
-__all__ = ["BotAPI"]
+__all__ = ["BotAPI", "AT_EVERYONE"]
 
 _log = get_logger(__name__)
+
+# Group-only token that mentions every member in a text (msg_type=0) or
+# markdown (msg_type=2) message.  The bot must be an administrator of the
+# group, and the platform allows one such message per group per day.
+AT_EVERYONE = "<qqbot-at-everyone />"
 
 JsonDict = Dict[str, Any]
 
@@ -652,8 +657,20 @@ class BotAPI:
         media: Optional[Any] = None,
         message_reference: Optional[Any] = None,
         is_wakeup: Optional[bool] = None,
+        card: Optional[Any] = None,
         **fields: Any,
     ) -> Any:
+        """Send a group message.
+
+        msg_type picks which content field takes effect: 0 text (content),
+        2 markdown, 7 media, 8 card (tuwen).  ``card`` is a MessageCard such as
+        {"type": "tuwen", "content": {"title": ..., "description": ...,
+        "url": ..., "pic_url": ...}}.
+
+        To mention every group member, put AT_EVERYONE inside ``content`` or
+        ``markdown["content"]``; the bot must be a group administrator and the
+        platform allows one such message per group per day.
+        """
         payload = {
             "msg_type": int(msg_type),
             "content": content,
@@ -665,6 +682,7 @@ class BotAPI:
             "media": media,
             "message_reference": message_reference,
             "is_wakeup": is_wakeup,
+            "card": card,
             **fields,
         }
         return await self._post("/v2/groups/{group_openid}/messages", json=payload, group_openid=group_openid)
@@ -854,8 +872,15 @@ class BotAPI:
         media: Optional[Any] = None,
         message_reference: Optional[Any] = None,
         is_wakeup: Optional[bool] = None,
+        card: Optional[Any] = None,
         **fields: Any,
     ) -> Any:
+        """Send a C2C (private) message.
+
+        msg_type picks which content field takes effect: 0 text (content),
+        2 markdown, 6 input-notify, 7 media, 8 card (tuwen).  ``card`` is a
+        MessageCard; see post_group_message.
+        """
         payload = {
             "msg_type": int(msg_type),
             "content": content,
@@ -867,6 +892,7 @@ class BotAPI:
             "media": media,
             "message_reference": message_reference,
             "is_wakeup": is_wakeup,
+            "card": card,
             **fields,
         }
         return await self._post("/v2/users/{openid}/messages", json=payload, openid=openid)

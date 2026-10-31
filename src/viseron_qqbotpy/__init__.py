@@ -4,7 +4,7 @@ The package exposes the main Client, Intents, event models and exceptions.
 """
 
 from .client import Client
-from .api import BotAPI
+from .api import AT_EVERYONE, BotAPI
 from .env import load_env
 from .http import HTTPClient, Route
 from .token import AccessToken, TokenManager
@@ -49,6 +49,7 @@ from .logging import configure_logging, get_logger
 
 __all__ = [
     "APIError",
+    "AT_EVERYONE",
     "AccessToken",
     "AudioAction",
     "BotAPI",
@@ -97,4 +98,4 @@ __all__ = [
     "load_panels",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"

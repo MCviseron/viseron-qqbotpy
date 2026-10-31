@@ -500,6 +500,12 @@ TypedDict 类型提示，定义在 viseron_qqbotpy.types。
 - MediaImageComplete：完成上传的响应（image_id / url / ttl / preview_url）。
 - MediaImage / MediaImageList：查询有效图片的列表项与分页结构。
 
+图文卡片类型（对齐平台文档 2026-10-28）：
+
+- MessageCard：msg_type=8 时放进 `card` 字段的卡片对象（type + content）。
+- MessageCardContent：图文卡片正文，title(1-50) / description(1-200) / url(https,≤1024) / pic_url(https,≤1024)。
+- AT_EVERYONE：主包导出的常量 `<qqbot-at-everyone />`，放进群聊 content 或 markdown 即可 @全部成员。
+
 ## 10. Webhook 签名验证
 
 Webhook 签名功能在主包 viseron_qqbotpy.webhook，但依赖 cryptography，需要安装可选依赖。
