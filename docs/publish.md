@@ -351,3 +351,106 @@ tag 名与 pyproject.toml 中的 version 保持一致，例如 0.3.0 对应 v0.3
 - ModuleNotFoundError：确认使用 ChatClone-BotPy 环境。
 - 构建后 import 旧版本：清理 build、egg-info、__pycache__ 后重装。
 
+## 9. GitHub Actions 自动发布（Trusted Publishing）
+
+上面第 8 节是**手动**流程。从 v0.4.1 之后，仓库里也提供了**自动**发布：用 PyPI 的
+Trusted Publishing（OIDC 身份联邦），**不需要在 GitHub 里存任何 API Token 或 Secret**。
+
+### 9.1 原理
+
+GitHub Actions 运行时可以申请一个短期 OIDC 身份令牌，PyPI / TestPyPI 校验这个令牌里的
+「仓库 + workflow 文件名 + environment 名」，匹配才允许上传。所以：
+
+- 不用 `TWINE_PASSWORD`，也不用把 token 存进仓库 Secret；
+- 每次上传的身份是「某个仓库的某个 workflow 在某个 environment 里跑的某次构建」，
+  被冒用的风险比长期 token 低；
+- 上传时会自动附带 PEP 740 数字证明（attestations）。
+
+### 9.2 两个 workflow
+
+| 文件 | 触发 | 目标 |
+|---|---|---|
+| `.github/workflows/publish-testpypi.yml` | 手动 `workflow_dispatch`（可选 ref） | TestPyPI |
+| `.github/workflows/publish-pypi.yml` | 推送 `v*` tag；或手动指定 tag | 正式 PyPI |
+
+两者的 `build` job 完全一致：装依赖 → `pytest` → `scripts/check_release.py` → `build` →
+`twine check` → 上传 artifact；`publish` job 只负责把 artifact 交给 `pypa/gh-action-pypi-publish`。
+
+### 9.3 一次性配置（必须由仓库所有者完成）
+
+发布前要在两个平台各登记一个 **pending publisher**（项目还不存在时也可以先登记）。
+
+**PyPI**（https://pypi.org/manage/account/publishing/）：
+
+| 字段 | 值 |
+|---|---|
+| PyPI Project Name | `viseron-qqbotpy` |
+| Owner | `MCviseron` |
+| Repository name | `viseron-qqbotpy` |
+| Workflow name | `publish-pypi.yml` |
+| Environment name | `pypi` |
+
+**TestPyPI**（https://test.pypi.org/manage/account/publishing/）：
+
+| 字段 | 值 |
+|---|---|
+| PyPI Project Name | `viseron-qqbotpy` |
+| Owner | `MCviseron` |
+| Repository name | `viseron-qqbotpy` |
+| Workflow name | `publish-testpypi.yml` |
+| Environment name | `testpypi` |
+
+> 四个字段必须**逐字**对上，尤其是 workflow 文件名和 environment 名；写错了上传会 403，
+> 报错里通常带 `invalid-publisher`。environment 可以另外在仓库 Settings → Environments
+> 里创建同名环境（可选加保护规则），不创建也能用。
+
+### 9.4 版本一致性检查
+
+`scripts/check_release.py` 会检查：
+
+1. `pyproject.toml` 的 `version` 与 `src/viseron_qqbotpy/__init__.py` 的 `__version__` 一致；
+2. 版本号不含 `+local` 本地标记（PyPI 不接受）；
+3. 在 tag 构建中，tag 必须等于 `v<version>`。
+
+本地也可以先跑一遍：
+
+    python scripts/check_release.py
+    python scripts/check_release.py --expect-tag v0.4.2
+
+### 9.5 推荐发布流程
+
+1. 改版本号（两处）、更新 CHANGELOG，跑本地测试与构建：
+
+   ```
+   python scripts/check_release.py
+   python -m pytest -q
+   python -m build
+   python -m twine check dist/*
+   ```
+
+2. 提交并推送 main。
+3. 在 GitHub Actions 页面手动跑 **Publish to TestPyPI**，验证上传与打包链路；
+   成功后可以 `pip install -i https://test.pypi.org/simple/ viseron-qqbotpy==X.Y.Z` 试装。
+4. 打 tag 并推送，自动发正式版：
+
+   ```
+   git tag -a vX.Y.Z -m "viseron-qqbotpy vX.Y.Z"
+   git push origin vX.Y.Z
+   ```
+
+5. 看 Actions 的 **Publish to PyPI** 是否绿色，然后 `pip install --upgrade viseron-qqbotpy` 验证。
+
+### 9.6 常见失败
+
+- `invalid-publisher` / 403：9.3 的四个字段有一个不对，或没登记 pending publisher。
+- `id-token` 权限缺失：workflow 的 publish job 必须声明 `permissions: id-token: write`。
+- `File already exists`：同名同版本已上传过，升版本；TestPyPI 那条 workflow 开了
+  `skip-existing: true`，所以重跑不会炸，正式 PyPI 故意没开。
+- tag 与版本不一致：`check_release.py` 会在 build 阶段就失败，不会走到上传。
+- environment 名写错：PyPI 侧登记的 environment 与 workflow 里的 `environment.name` 必须一致。
+
+### 9.7 与手动流程的关系
+
+第 8 节的手动流程仍然可用（本地 `twine upload`），适合应急。但正常发版请走 Actions：
+手动上传和 Actions 上传对 PyPI 来说是同一件事，**同一版本只能上传一次**，谁先上谁生效。
+

@@ -12,6 +12,14 @@
 - 新增 docs/automation.md：QQ 文档同步自动化任务定义、任务卡字段、版本规则和验收标准。
 - docs/publish.md 增加完整手动发布流程，覆盖 ChatClone-BotPy 环境、测试、构建、twine 检查、TestPyPI、PyPI、发布后验证和 tag 推送。
 - README 与 docs/README.md 增加自动化任务文档入口。
+- 新增 GitHub Actions 自动发布（Trusted Publishing / OIDC，无需在仓库保存任何 API Token）：
+  `.github/workflows/publish-testpypi.yml`（手动触发发 TestPyPI）与
+  `.github/workflows/publish-pypi.yml`（推 `v*` tag 自动发正式 PyPI），
+  两者都先跑 pytest、版本一致性检查、build、twine check，再交给 pypa/gh-action-pypi-publish 上传。
+- 新增 `scripts/check_release.py`：校验 pyproject 与 __init__ 版本一致、版本号无本地标记、
+  tag 必须等于 `v<version>`；CI 与本地共用。
+- docs/publish.md 新增第 9 节，说明 Trusted Publishing 原理、两个 workflow、
+  PyPI / TestPyPI 的 pending publisher 四个字段、推荐发布流程与常见失败。
 
 ## [0.4.1] - 2026-10-31
 
