@@ -11,6 +11,41 @@
 
 - 暂无。
 
+## [0.4.3] - 2026-11-20
+
+### Added
+
+- 新增 `at_user(openid)`：生成平台「文本交互」要求的 `<qqbot-at-user id="..." />` @用户标签。
+  - 群聊仅 markdown 消息可用，id 填 `member_openid`；
+  - 文字子频道支持文本 / 图文 / markdown，id 填 `user_openid`；
+  - 空 id 或含引号 / 尖括号 / 空白时抛 `ValueError`。
+- 补充 `tests/test_message_card.py` 中 @用户 相关用例（标签形状、非法 id、群聊 markdown、子频道文本）。
+
+### Changed
+
+- **docs 目录整体改名并加序号**，按文件名排序即为阅读顺序；`docs/README.md` 改为带说明的索引表。
+  旧名 → 新名对照：
+
+  | 旧 | 新 |
+  |---|---|
+  | getting-started.md | 01-快速开始.md |
+  | core.md | 02-基础能力.md |
+  | events.md | 03-事件监听.md |
+  | features.md | 04-功能指南.md |
+  | api-reference.md | 05-API参考.md |
+  | ext.md | 06-扩展工具.md |
+  | management.md | 07-面板与群管理.md |
+  | webhook.md | 08-Webhook签名.md |
+  | publish.md | 09-构建与发布.md |
+  | automation.md | 10-自动化任务.md |
+
+- `04-功能指南.md` 顶部新增目录表，15 个章节可直接跳转。
+- `04-功能指南.md` 的「3.9 @全部成员」扩写为「3.9 @ 能力（@用户 / @全部成员）」，
+  补上平台支持矩阵（群聊 @用户仅 markdown、子频道 id 用 user_openid）与旧协议弃用说明。
+- `02-基础能力.md` 新增「9.1 @ 标记」小节，说明 `AT_EVERYONE` 与 `at_user` 的差异与限制。
+- 仓库 README 与各文档内的交叉链接全部指向新的中文文件名。
+- `tests/test_docs_coverage.py` 的文档路径跟随改名更新。
+
 ## [0.4.2] - 2026-11-13
 
 ### Added

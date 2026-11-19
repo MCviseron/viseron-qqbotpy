@@ -4,7 +4,7 @@ The package exposes the main Client, Intents, event models and exceptions.
 """
 
 from .client import Client
-from .api import AT_EVERYONE, BotAPI
+from .api import AT_EVERYONE, BotAPI, at_user
 from .env import load_env
 from .http import HTTPClient, Route
 from .token import AccessToken, TokenManager
@@ -92,10 +92,11 @@ __all__ = [
     "User",
     "ViseronError",
     "WebSocketError",
+    "at_user",
     "configure_logging",
     "get_logger",
     "load_group_store",
     "load_panels",
 ]
 
-__version__ = "0.4.2"
+__version__ = "0.4.3"

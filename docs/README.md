@@ -1,14 +1,24 @@
 # viseron-qqbotpy 使用文档
 
-- 快速开始：docs/getting-started.md
-- SDK 基础能力：docs/core.md
-- 事件监听：docs/events.md
-- 功能实现指南：docs/features.md
-- API 参考：docs/api-reference.md
-- 扩展工具：docs/ext.md
-- 面板与群管理：docs/management.md
-- 自动化任务：docs/automation.md
-- Webhook 签名验证：docs/webhook.md
-- 构建、发布与安装：docs/publish.md
+按「先跑起来 → 再查细节」的顺序排列，文件名带序号，按名字排序就是阅读顺序。
 
-也可以从项目根目录的 README.md 了解项目概览。
+| # | 文档 | 内容 |
+|---|---|---|
+| 01 | [快速开始](01-快速开始.md) | 安装、最小可运行示例、Intents、不连网关直接调 API |
+| 02 | [基础能力](02-基础能力.md) | Client、TokenManager、HTTPClient、日志、异常、类型辅助 |
+| 03 | [事件监听](03-事件监听.md) | 事件表、`on_*` 回调、事件对象字段 |
+| 04 | [功能指南](04-功能指南.md) | 按场景的可复制示例（消息、群聊、成员、媒体、面板…） |
+| 05 | [API 参考](05-API参考.md) | `BotAPI` 每个方法的签名，按业务域分组 |
+| 06 | [扩展工具](06-扩展工具.md) | 命令装饰器、颜色转换、频道跳转、YAML 配置、调度器 |
+| 07 | [面板与群管理](07-面板与群管理.md) | Panel / PanelStore / GroupStore 与本地配置同步 |
+| 08 | [Webhook 签名](08-Webhook签名.md) | Ed25519 回调签名校验 |
+| 09 | [构建与发布](09-构建与发布.md) | 打包、TestPyPI / PyPI 发布、GitHub Actions Trusted Publishing |
+| 10 | [自动化任务](10-自动化任务.md) | QQ 文档同步任务的定义、版本规则与验收标准 |
+
+## 从哪里开始
+
+- 第一次用：**01** → **02** → 挑一个 **04** 里的示例改。
+- 找某个接口：**05**（方法名直接搜）。
+- 发布新版本：**09**（手动流程与 CI 流程都在里面）。
+
+项目概览见仓库根目录的 [README](../README.md)。

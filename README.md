@@ -23,18 +23,18 @@
 
 ## 使用文档
 
-完整使用文档见 docs/ 目录：
+完整使用文档见 docs/ 目录（文件名带序号，按名字排序即阅读顺序）：
 
-- docs/getting-started.md：安装、快速开始、Intents、直接调用 API
-- docs/core.md：SDK 基础能力，如 Client、TokenManager、BotAPI、日志、异常等
-- docs/events.md：事件监听、事件表、事件对象字段
-- docs/features.md：常见功能实现示例
-- docs/api-reference.md：API 方法参考
-- docs/ext.md：命令装饰器、颜色转换等扩展
-- docs/management.md：面板与群管理、本地配置同步
-- docs/automation.md：QQ 文档同步自动化任务与版本规则
-- docs/webhook.md：Webhook 签名验证
-- docs/publish.md：构建、上架 PyPI、安装与下载方式
+- docs/01-快速开始.md：安装、快速开始、Intents、直接调用 API
+- docs/02-基础能力.md：SDK 基础能力，如 Client、TokenManager、BotAPI、日志、异常等
+- docs/03-事件监听.md：事件监听、事件表、事件对象字段
+- docs/04-功能指南.md：常见功能实现示例（含目录，15 个场景）
+- docs/05-API参考.md：API 方法参考
+- docs/06-扩展工具.md：命令装饰器、颜色转换等扩展
+- docs/07-面板与群管理.md：面板与群管理、本地配置同步
+- docs/08-Webhook签名.md：Webhook 签名验证
+- docs/09-构建与发布.md：构建、上架 PyPI、安装与下载方式
+- docs/10-自动化任务.md：QQ 文档同步自动化任务与版本规则
 
 ## 安装
 
@@ -118,7 +118,7 @@ SDK 可以把群聊状态和指令面板配置保存在本地：
         )
         bot.run(appid=APPID, secret=APPSECRET)
 
-详细说明见 docs/management.md。
+详细说明见 docs/07-面板与群管理.md。
 
 ## 直接调用 API
 

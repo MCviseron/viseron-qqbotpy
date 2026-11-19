@@ -19,7 +19,7 @@ from aiohttp import FormData
 from .http import HTTPClient, Route
 from .logging import get_logger
 
-__all__ = ["BotAPI", "AT_EVERYONE"]
+__all__ = ["BotAPI", "AT_EVERYONE", "at_user"]
 
 _log = get_logger(__name__)
 
@@ -27,6 +27,30 @@ _log = get_logger(__name__)
 # markdown (msg_type=2) message.  The bot must be an administrator of the
 # group, and the platform allows one such message per group per day.
 AT_EVERYONE = "<qqbot-at-everyone />"
+
+_BAD_MENTION_CHARS = set('"<> \t\r\n')
+
+
+def at_user(openid: str) -> str:
+    """Build the ``<qqbot-at-user id="..." />`` mention token.
+
+    Where it works (platform docs: 文本交互):
+
+    * group chat - **markdown messages only**; pass the target member's
+      ``member_openid``;
+    * text sub-channel - text / card / markdown messages; pass the target
+      user's ``user_openid``.
+
+    The older ``<@userid>`` protocol is deprecated by the platform.
+    """
+    if not isinstance(openid, str) or openid == "":
+        raise ValueError("at_user() requires a non-empty openid")
+    if any(char in _BAD_MENTION_CHARS for char in openid):
+        raise ValueError(
+            "openid must not contain quotes, angle brackets or whitespace: "
+            f"{openid!r}"
+        )
+    return f'<qqbot-at-user id="{openid}" />'
 
 JsonDict = Dict[str, Any]
 

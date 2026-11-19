@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from viseron_qqbotpy import AT_EVERYONE
+from viseron_qqbotpy import AT_EVERYONE, at_user
 from viseron_qqbotpy.api import BotAPI
 
 
@@ -121,3 +121,46 @@ async def test_at_everyone_in_markdown_content():
     body = http.last["kwargs"]["json"]
     assert body["msg_type"] == 2
     assert AT_EVERYONE in body["markdown"]["content"]
+
+
+# --------------------------------------------------------------------------- #
+# @用户 (qqbot-at-user) —— 平台文档「文本交互」
+# --------------------------------------------------------------------------- #
+def test_at_user_token_shape():
+    assert at_user("0123456789ABCDEF") == '<qqbot-at-user id="0123456789ABCDEF" />'
+
+
+@pytest.mark.parametrize("bad", ["", 'a"b', "a<b", "a b", "a\nb"])
+def test_at_user_rejects_bad_ids(bad):
+    with pytest.raises(ValueError):
+        at_user(bad)
+
+
+@pytest.mark.asyncio
+async def test_at_user_inside_group_markdown():
+    http = RecordingHTTP()
+    api = BotAPI(http)
+
+    await api.post_group_message(
+        group_openid=GROUP,
+        msg_type=2,
+        markdown={"content": f"{at_user('MEMBER_OPENID')} 你的订单已发货"},
+    )
+
+    body = http.last["kwargs"]["json"]
+    assert body["msg_type"] == 2
+    assert '<qqbot-at-user id="MEMBER_OPENID" />' in body["markdown"]["content"]
+
+
+@pytest.mark.asyncio
+async def test_at_user_inside_channel_text():
+    http = RecordingHTTP()
+    api = BotAPI(http)
+
+    await api.post_message(
+        channel_id="CHANNEL",
+        content=f"{at_user('USER_OPENID')} 看一下这条",
+    )
+
+    body = http.last["kwargs"]["json"]
+    assert '<qqbot-at-user id="USER_OPENID" />' in body["content"]

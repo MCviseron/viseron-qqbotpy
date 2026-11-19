@@ -1,4 +1,4 @@
-"""Keep docs/api-reference.md in sync with the BotAPI surface.
+"""Keep docs/05-API参考.md in sync with the BotAPI surface.
 
 Every public coroutine on BotAPI must be mentioned in the API reference, so a
 newly added endpoint cannot silently ship undocumented.  The reverse direction
@@ -13,7 +13,7 @@ from pathlib import Path
 
 from viseron_qqbotpy.api import BotAPI
 
-DOCS = Path(__file__).resolve().parents[1] / "docs" / "api-reference.md"
+DOCS = Path(__file__).resolve().parents[1] / "docs" / "05-API参考.md"
 
 
 def _public_api_names() -> set:
@@ -40,14 +40,14 @@ def test_every_api_method_is_documented():
     text = DOCS.read_text(encoding="utf-8")
     documented = _documented_names(text)
     missing = sorted(_public_api_names() - documented)
-    assert not missing, f"BotAPI methods missing from docs/api-reference.md: {missing}"
+    assert not missing, f"BotAPI methods missing from docs/05-API参考.md: {missing}"
 
 
 def test_no_documented_method_is_missing_from_api():
     text = DOCS.read_text(encoding="utf-8")
     documented = _documented_names(text)
     unknown = sorted(documented - _public_api_names())
-    assert not unknown, f"docs/api-reference.md documents unknown methods: {unknown}"
+    assert not unknown, f"docs/05-API参考.md documents unknown methods: {unknown}"
 
 
 def test_readme_feature_list_mentions_group_member_management():
