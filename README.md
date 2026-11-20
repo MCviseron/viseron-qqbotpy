@@ -38,12 +38,28 @@
 
 ## 安装
 
-    cd viseron-botpy
-    pip install -e .
+从 PyPI 安装（推荐）：
 
-开发模式安装额外依赖：
+    pip install viseron-qqbotpy
 
+需要扩展工具（YAML 配置 / APScheduler）或 Webhook 签名时：
+
+    pip install "viseron-qqbotpy[ext]"
+    pip install "viseron-qqbotpy[webhook]"
+
+指定版本（PyPI 上当前为 0.4.2）：
+
+    pip install "viseron-qqbotpy==0.4.2"
+
+从源码安装（要改代码 / 跟着 main 走时）：
+
+    git clone https://github.com/MCviseron/viseron-qqbotpy.git
+    cd viseron-qqbotpy
     pip install -e ".[dev]"
+
+国内镜像同步可能有延迟，装不到最新版时临时用官方源：
+
+    pip install -i https://pypi.org/simple/ viseron-qqbotpy
 
 ## 快速开始
 

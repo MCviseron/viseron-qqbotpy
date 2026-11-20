@@ -23,6 +23,17 @@
 
 ### Changed
 
+- 安装方式改为 **PyPI 优先**：README 与 `docs/01-快速开始.md` 现在第一步就是
+  `pip install viseron-qqbotpy`，可选依赖写成 `pip install "viseron-qqbotpy[ext]"` /
+  `"[webhook]"`，源码安装（`pip install -e ".[dev]"`）降为「要改代码时」的备选。
+- 补充安装排错：国内镜像同步延迟时改用 `-i https://pypi.org/simple/`、
+  装到旧版本时的清理步骤、以及用 `__version__` + `__file__` 确认装的是哪一份。
+- `docs/09-构建与发布.md`：第 1 节三种安装方式改为「PyPI → 源码 → 本地产物」，
+  第 7 节由「当前已构建的产物（0.3.0）」改为「已发布的版本」表（PyPI 0.4.2 / TestPyPI 0.4.3），
+  并说明「推 main 只更新 TestPyPI、推 tag 才更新 PyPI」。
+- `docs/02-基础能力.md`、`docs/06-扩展工具.md`、`docs/08-Webhook签名.md` 的可选依赖安装
+  统一改为 PyPI 写法（保留源码写法作为备选）。
+- 文档里示例版本号统一到 0.4.x（原为 0.2.0 / 0.3.0）。
 - **docs 目录整体改名并加序号**，按文件名排序即为阅读顺序；`docs/README.md` 改为带说明的索引表。
   旧名 → 新名对照：
 

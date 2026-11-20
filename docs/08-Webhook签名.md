@@ -4,6 +4,12 @@ WebSocket 是推荐接入方式。如果使用 HTTP 回调，需要验证平台�
 
 ## 1. 安装依赖
 
+已发布到 PyPI，推荐直接装可选依赖：
+
+    pip install "viseron-qqbotpy[webhook]"
+
+从源码安装时用：
+
     pip install -e ".[webhook]"
 
 ## 2. 验证回调请求
