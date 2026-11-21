@@ -49,6 +49,7 @@ class User:
     user_openid: Optional[str] = None
     member_openid: Optional[str] = None
     member_role: Optional[str] = None
+    member_nickname: Optional[str] = None
     raw: Dict[str, Any] = field(default_factory=dict, repr=False)
 
     @classmethod
@@ -64,6 +65,7 @@ class User:
             user_openid=data.get("user_openid"),
             member_openid=data.get("member_openid"),
             member_role=data.get("member_role"),
+            member_nickname=data.get("member_nickname"),
             raw=dict(data),
         )
 
@@ -165,8 +167,10 @@ class GroupMessage:
 
     id: Optional[str] = None
     group_openid: Optional[str] = None
+    union_group_openid: Optional[str] = None
     content: Optional[str] = None
     author: Optional[User] = None
+    member_nickname: Optional[str] = None
     mentions: List[User] = field(default_factory=list)
     attachments: List[Dict[str, Any]] = field(default_factory=list)
     message_reference: Optional[Dict[str, Any]] = None
@@ -180,11 +184,14 @@ class GroupMessage:
     def from_payload(cls, api: Any, event_id: Optional[str], data: Dict[str, Any]) -> "GroupMessage":
         data = data or {}
         mentions = [User.from_payload(item) for item in data.get("mentions") or []]
+        author = User.from_payload(data.get("author"))
         return cls(
             id=_str(data.get("id")),
             group_openid=_str(data.get("group_openid")),
+            union_group_openid=data.get("union_group_openid"),
             content=data.get("content"),
-            author=User.from_payload(data.get("author")),
+            author=author,
+            member_nickname=data.get("member_nickname") or (author.member_nickname if author else None),
             mentions=mentions,
             attachments=list(data.get("attachments") or []),
             message_reference=data.get("message_reference"),
@@ -527,6 +534,7 @@ class OpenForumThread:
 class GroupManageEvent:
     timestamp: Optional[str] = None
     group_openid: Optional[str] = None
+    union_group_openid: Optional[str] = None
     op_member_openid: Optional[str] = None
     event_id: Optional[str] = None
     raw: Dict[str, Any] = field(default_factory=dict, repr=False)
@@ -538,6 +546,7 @@ class GroupManageEvent:
         return cls(
             timestamp=data.get("timestamp"),
             group_openid=_str(data.get("group_openid")),
+            union_group_openid=data.get("union_group_openid"),
             op_member_openid=data.get("op_member_openid"),
             event_id=event_id,
             raw=dict(data),
@@ -569,6 +578,7 @@ class C2CManageEvent:
 class GroupMemberEvent:
     timestamp: Optional[str] = None
     group_openid: Optional[str] = None
+    union_group_openid: Optional[str] = None
     member_openid: Optional[str] = None
     user_openid: Optional[str] = None
     event_id: Optional[str] = None
@@ -581,6 +591,7 @@ class GroupMemberEvent:
         return cls(
             timestamp=data.get("timestamp"),
             group_openid=_str(data.get("group_openid")),
+            union_group_openid=data.get("union_group_openid"),
             member_openid=data.get("member_openid"),
             user_openid=data.get("user_openid"),
             event_id=event_id,

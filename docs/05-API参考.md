@@ -80,6 +80,7 @@
 - get_permissions(guild_id)：获取机器人在频道的 API 权限列表
 - post_permission_demand(guild_id, channel_id, api_identify, desc)：创建权限授权链接
 - me()：获取机器人详情
+- get_user_info(openid)：按 openid 获取用户基本信息（union_openid / username / avatar / allow_proactive_msg），10 QPS
 - me_guilds(guild_id, limit, desc)：获取机器人加入的频道列表
 - get_ws_url()：获取通用 WSS 接入点
 - get_ws_url_shard()：获取带分片 WSS 接入点

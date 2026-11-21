@@ -12,6 +12,7 @@ import json
 import os
 from io import BufferedReader
 from typing import Any, BinaryIO, Dict, List, Optional, Union
+from urllib.parse import quote
 
 import aiohttp
 from aiohttp import FormData
@@ -19,7 +20,7 @@ from aiohttp import FormData
 from .http import HTTPClient, Route
 from .logging import get_logger
 
-__all__ = ["BotAPI", "AT_EVERYONE", "at_user"]
+__all__ = ["BotAPI", "AT_EVERYONE", "at_user", "cmd_enter", "cmd_input"]
 
 _log = get_logger(__name__)
 
@@ -51,6 +52,44 @@ def at_user(openid: str) -> str:
             f"{openid!r}"
         )
     return f'<qqbot-at-user id="{openid}" />'
+
+
+_MAX_CMD_TEXT = 100
+
+
+def _encode_cmd_text(value: str, field: str) -> str:
+    if not isinstance(value, str) or value == "":
+        raise ValueError(f"cmd {field} must be a non-empty string")
+    if len(value) > _MAX_CMD_TEXT:
+        raise ValueError(
+            f"cmd {field} exceeds {_MAX_CMD_TEXT} characters ({len(value)})"
+        )
+    return quote(value, safe="")
+
+
+def cmd_enter(text: str) -> str:
+    """Build ``<qqbot-cmd-enter text="..." />`` - a "press Enter" command chip.
+
+    Only works in **text sub-channel markdown messages** (not group chat).
+    Clicking it sends ``text`` immediately, so ``text`` is the full command.
+    """
+    encoded = _encode_cmd_text(text, "text")
+    return f'<qqbot-cmd-enter text="{encoded}" />'
+
+
+def cmd_input(text: str, show: Optional[str] = None, reference: bool = False) -> str:
+    """Build ``<qqbot-cmd-input text="..." show="..." reference="false" />``.
+
+    Only works in **text sub-channel markdown messages**.  Clicking inserts
+    ``text`` into the input box for the user to edit; ``show`` is the label the
+    user sees (defaults to ``text``); ``reference`` adds a quote-reply to the
+    input box.
+    """
+    encoded = _encode_cmd_text(text, "text")
+    shown = _encode_cmd_text(show, "show") if show is not None else encoded
+    flag = "true" if reference else "false"
+    return f'<qqbot-cmd-input text="{encoded}" show="{shown}" reference="{flag}" />'
+
 
 JsonDict = Dict[str, Any]
 
@@ -650,6 +689,15 @@ class BotAPI:
 
     async def me(self) -> Any:
         return await self._get("/users/@me")
+
+    async def get_user_info(self, openid: str) -> Any:
+        """Get basic information about a user by openid.
+
+        Platform docs 2026-11-16.  Rate limit 10 QPS.  Returns union_openid,
+        username, avatar and allow_proactive_msg (whether the user accepts
+        proactive pushes).
+        """
+        return await self._get("/v2/users/{openid}/info", openid=openid)
 
     async def me_guilds(self, guild_id: Optional[str] = None, limit: int = 100, desc: bool = False) -> Any:
         params: Dict[str, Any] = {"limit": limit}

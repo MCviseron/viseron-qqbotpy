@@ -1,8 +1,9 @@
-"""Offline contract tests for the 2026-10-26 / 2026-10-28 message changes.
+"""Offline contract tests for the message token / card changes.
 
 Platform changelog:
 - 20261028  新增图文卡片消息 (msg_type=8, ``card`` field, type "tuwen")
 - 20261026  群聊文本 / markdown 消息支持 <qqbot-at-everyone /> @全部成员
+- 文本交互页  <qqbot-at-user id="" />、<qqbot-cmd-enter />、<qqbot-cmd-input />
 
 No network is touched: a recording stand-in for HTTPClient captures the built
 request.
@@ -12,7 +13,7 @@ from __future__ import annotations
 
 import pytest
 
-from viseron_qqbotpy import AT_EVERYONE, at_user
+from viseron_qqbotpy import AT_EVERYONE, at_user, cmd_enter, cmd_input
 from viseron_qqbotpy.api import BotAPI
 
 
@@ -164,3 +165,32 @@ async def test_at_user_inside_channel_text():
 
     body = http.last["kwargs"]["json"]
     assert '<qqbot-at-user id="USER_OPENID" />' in body["content"]
+
+
+# --------------------------------------------------------------------------- #
+# 指令嵌字（<qqbot-cmd-enter /> / <qqbot-cmd-input />）—— 平台文档「文本交互」
+# --------------------------------------------------------------------------- #
+def test_cmd_enter_urlencodes_text():
+    assert cmd_enter("/签到") == '<qqbot-cmd-enter text="%2F%E7%AD%BE%E5%88%B0" />'
+
+
+def test_cmd_input_defaults_show_to_text():
+    token = cmd_input("每日签到")
+    assert token.startswith('<qqbot-cmd-input text="%E6%AF%8F%E6%97%A5%E7%AD%BE%E5%88%B0"')
+    assert 'show="%E6%AF%8F%E6%97%A5%E7%AD%BE%E5%88%B0"' in token
+    assert 'reference="false"' in token
+
+
+def test_cmd_input_with_show_and_reference():
+    token = cmd_input("a b", show="点我", reference=True)
+    assert 'text="a%20b"' in token
+    assert 'show="%E7%82%B9%E6%88%91"' in token
+    assert 'reference="true"' in token
+
+
+@pytest.mark.parametrize("text", ["", "x" * 101])
+def test_cmd_tokens_reject_bad_text(text):
+    with pytest.raises(ValueError):
+        cmd_enter(text)
+    with pytest.raises(ValueError):
+        cmd_input(text)

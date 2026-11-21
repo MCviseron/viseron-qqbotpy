@@ -51,6 +51,7 @@ __all__ = [
     "RenderData",
     "Row",
     "User",
+    "UserInfo",
 ]
 
 
@@ -64,6 +65,16 @@ class User(TypedDict, total=False):
     user_openid: str
     member_openid: str
     member_role: str
+    member_nickname: str
+
+
+class UserInfo(TypedDict, total=False):
+    """Response of GET /v2/users/{user_openid}/info (platform docs 2026-11-16)."""
+
+    union_openid: str  # cross-application id, present when a third-party app is bound
+    username: str
+    avatar: str  # original avatar url
+    allow_proactive_msg: bool  # whether the user accepts proactive pushes
 
 
 class MessageMarkdown(TypedDict, total=False):

@@ -11,6 +11,33 @@
 
 - 暂无。
 
+## [0.4.4] - 2026-11-21
+
+### Added
+
+- 对齐平台文档 2026-11-16 新增接口：`get_user_info(openid)` → `GET /v2/users/{user_openid}/info`，
+  返回 union_openid / username / avatar / allow_proactive_msg（10 QPS）。
+- types 新增 `UserInfo` 类型提示。
+- 事件模型补齐 2026-11-16 新字段：`User.member_nickname`（群内昵称）、
+  `GroupMessage.union_group_openid` 与 `GroupMessage.member_nickname`（取自 author 的便捷字段）、
+  `GroupManageEvent.union_group_openid`、`GroupMemberEvent.union_group_openid`。
+- 新增 `tests/test_user_info.py`：6 个离线测试，覆盖新接口路径、User.member_nickname 解析、
+  GroupMessage 的新字段与 member_nickname 优先级、两个群事件对象的 union_group_openid。
+- 新增 `cmd_enter(text)` / `cmd_input(text, show=None, reference=False)`：生成平台「文本交互」页的
+  指令嵌字 `<qqbot-cmd-enter />` / `<qqbot-cmd-input />`（仅文字子频道 markdown），自动 urlencode，
+  text/show 为空或超过 100 字符时抛 `ValueError`。
+- `tests/test_message_card.py` 补充指令嵌字用例（urlencode、show 默认值、reference 开关、长度校验）。
+
+### Changed
+
+- `docs/04-功能指南.md` 新增 3.10「私聊回复群消息」（用群消息 msg_id 走单聊接口）、
+  3.11「指令嵌字（文本子频道）」与 16「用户信息」（`get_user_info` 用法 + 事件里新增的用户/群字段）；
+  3.10 记录了 2026-11-17 的规则变化：被动回复有效期 5 分钟 → **60 分钟**、
+  次数上限 5 次 → **50 次**（机器人账号管理员是群主/管理员时，群内与私聊回复共用）。
+- `docs/05-API参考.md` 第 7 节新增 `get_user_info`。
+- `docs/03-事件监听.md` 的 GroupMessage / C2CMessage / User / GroupMemberEvent 字段表补齐新字段。
+- `docs/02-基础能力.md` 类型辅助章节补充 UserInfo 与 User.member_nickname。
+
 ## [0.4.3] - 2026-11-20
 
 ### Added
