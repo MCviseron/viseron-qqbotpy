@@ -20,7 +20,14 @@ from aiohttp import FormData
 from .http import HTTPClient, Route
 from .logging import get_logger
 
-__all__ = ["BotAPI", "AT_EVERYONE", "at_user", "cmd_enter", "cmd_input"]
+__all__ = [
+    "BotAPI",
+    "AT_EVERYONE",
+    "RECALL_ALREADY_GONE",
+    "at_user",
+    "cmd_enter",
+    "cmd_input",
+]
 
 _log = get_logger(__name__)
 
@@ -28,6 +35,10 @@ _log = get_logger(__name__)
 # markdown (msg_type=2) message.  The bot must be an administrator of the
 # group, and the platform allows one such message per group per day.
 AT_EVERYONE = "<qqbot-at-everyone />"
+
+# 群消息撤回时，这两个错误码都表示「消息已经不在了」：平台文档 2026-11-27 起把
+# 「已被其他成员撤回」和「已被本机器人撤回」拆成两个码。业务上通常当成功处理。
+RECALL_ALREADY_GONE = frozenset({40064009, 40064010})
 
 _BAD_MENTION_CHARS = set('"<> \t\r\n')
 

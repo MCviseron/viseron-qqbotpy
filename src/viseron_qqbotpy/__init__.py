@@ -4,7 +4,7 @@ The package exposes the main Client, Intents, event models and exceptions.
 """
 
 from .client import Client
-from .api import AT_EVERYONE, BotAPI, at_user, cmd_enter, cmd_input
+from .api import AT_EVERYONE, RECALL_ALREADY_GONE, BotAPI, at_user, cmd_enter, cmd_input
 from .env import load_env
 from .http import HTTPClient, Route
 from .token import AccessToken, TokenManager
@@ -50,6 +50,7 @@ from .logging import configure_logging, get_logger
 __all__ = [
     "APIError",
     "AT_EVERYONE",
+    "RECALL_ALREADY_GONE",
     "AccessToken",
     "AudioAction",
     "BotAPI",
@@ -101,4 +102,4 @@ __all__ = [
     "load_panels",
 ]
 
-__version__ = "0.4.4"
+__version__ = "0.4.5"
